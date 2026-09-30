@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bilab — Умный калькулятор девайсов</title>
+
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%238b5cf6'/%3E%3Cstop offset='1' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='url(%23g)'/%3E%3Cpath d='M24 16 V48 M24 16 H34 A8 8 0 0 1 34 32 H24 M24 32 H36 A8 8 0 0 1 36 48 H24' stroke='white' stroke-width='5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E">
+<meta name="theme-color" content="#8b5cf6">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+/* === БАЗОВЫЕ ПЕРЕМЕННЫЕ И ТЕМЫ === */
+:root[data-theme="dark"] {
+  --bg-1:#08080d;--bg-2:#10101a;
+  --orb-1:rgba(139,92,246,.28);--orb-2:rgba(6,182,212,.22);--orb-3:rgba(236,72,153,.14);
+  --card:rgba(255,255,255,.035);--card-hover:rgba(255,255,255,.055);--card-solid:#15151f;
+  --border:rgba(255,255,255,.08);--border-strong:rgba(255,255,255,.16);
+  --text:#f4f4f7;--text-dim:#9ca3af;--text-dimmer:#6b7280;
+  --accent:#8b5cf6;--accent-2:#06b6d4;--accent-soft:rgba(139,92,246,.14);--accent-glow:rgba(139,92,246,.4);
+  --error:#f87171;--error-soft:rgba(248,113,113,.12);
+  --success:#34d399;--success-soft:rgba(52,211,153,.12);
+  --input-bg:rgba(255,255,255,.04);--input-bg-focus:rgba(255,255,255,.09);
+  --shadow:0 25px 50px -12px rgba(0,0,0,.6);
+}
+:root[data-theme="light"] {
+  --bg-1:#f6f4ff;--bg-2:#eefaff;
+  --orb-1:rgba(139,92,246,.35);--orb-2:rgba(6,182,212,.3);--orb-3:rgba(236,72,153,.18);
+  --card:rgba(255,255,255,.7);--card-hover:rgba(255,255,255,.9);--card-solid:#fff;
+  --border:rgba(15,15,30,.07);--border-strong:rgba(15,15,30,.14);
+  --text:#14142b;--text-dim:#52525b;--text-dimmer:#71717a;
+  --accent:#7c3aed;--accent-2:#0891b2;--accent-soft:rgba(124,58,237,.09);--accent-glow:rgba(124,58,237,.25);
+  --error:#dc2626;--error-soft:rgba(220,38,38,.08);
+  --success:#059669;--success-soft:rgba(5,150,105,.09);
+  --input-bg:rgba(15,15,30,.035);--input-bg-focus:rgba(15,15,30,.07);
+  --shadow:0 25px 50px -12px rgba(80,80,120,.18);
+}
+*{box-sizing:border-box;margin:0;padding:0;outline:none;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:'Inter',system-ui,sans-serif;color:var(--text);
+  background:linear-gradient(135deg,var(--bg-1) 0%,var(--bg-2) 100%);
+  min-height:100vh;overflow-x:hidden;transition:background .4s,color .3s;
+  font-feature-settings:'cv11','ss01';-webkit-font-smoothing:antialiased;
+}
+.bg-orbs{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+.orb{position:absolute;border-radius:50%;filter:blur(100px);will-change:transform;transition:transform .1s linear}
+.orb-1{width:500px;height:500px;top:-150px;left:-100px;background:var(--orb-1);animation:float1 22s ease-in-out infinite}
+.orb-2{width:460px;height:460px;bottom:-140px;right:-80px;background:var(--orb-2);animation:float2 26s ease-in-out infinite}
+.orb-3{width:380px;height:380px;top:40%;left:45%;background:var(--orb-3);animation:float3 30s ease-in-out infinite}
+@keyframes float1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(80px,60px) scale(1.15)}}
+@keyframes float2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-70px,-50px) scale(1.2)}}
+@keyframes float3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-40px,50px) scale(.9)}}
+.app{position:relative;z-index:1;max-width:1140px;margin:0 auto;padding:28px 24px 60px}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;animation:fadeDown .5s both}
+.brand{display:flex;align-items:center;gap:12px;font-weight:800;font-size:1.25rem;letter-spacing:-.02em}
+.brand-mark{
+  width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 8px 24px var(--accent-glow);
+  position:relative;
+}
+.brand-mark::after{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.3),transparent);pointer-events:none}
+.brand-mark svg{width:20px;height:20px}
+.brand-text{background:linear-gradient(135deg,var(--text),var(--text-dim));-webkit-background-clip:text;background-clip:text;color:transparent}
+.brand-badge{font-size:.62rem;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent);letter-spacing:.08em;text-transform:uppercase;border:1px solid rgba(139,92,246,.25)}
+.topbar-actions{display:flex;align-items:center;gap:8px}
+.icon-btn{
+  width:40px;height:40px;border-radius:12px;background:var(--card);border:1px solid var(--border);
+  color:var(--text-dim);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .2s;backdrop-filter:blur(12px);
+}
+.icon-btn:hover{color:var(--text);background:var(--card-hover);border-color:var(--border-strong);transform:translateY(-1px)}
+.icon-btn svg{width:18px;height:18px}
+.lang-btn{width:auto;padding:0 12px;gap:8px;font-family:inherit;font-size:.78rem;font-weight:700}
+.lang-btn .fi{font-size:1.05em;border-radius:3px;box-shadow:0 0 0 1px rgba(255,255,255,.08)}
+@media (max-width:420px){.lang-btn .lang-code{display:none}}
+
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:1fr 340px;gap:24px;align-items:start}
+@media (max-width:900px){.layout{grid-template-columns:1fr}}
+
+/* PRESETS */
+.presets{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;animation:fadeUp .5s both;animation-delay:.05s}
+.preset{
+  position:relative;display:flex;align-items:center;gap:10px;padding:14px;
+  background:var(--card);border:1px solid var(--border);border-radius:14px;cursor:pointer;
+  transition:all .2s;backdrop-filter:blur(12px);font-family:inherit;color:var(--text);overflow:hidden;
+}
+.preset:hover{background:var(--card-hover);border-color:var(--border-strong);transform:translateY(-2px)}
+.preset.active{border-color:var(--accent);background:var(--accent-soft);box-shadow:0 8px 24px -8px var(--accent-glow)}
+.preset-icon{width:32px;height:32px;border-radius:10px;flex-shrink:0;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center}
+.preset-icon svg{width:16px;height:16px}
+.preset-text{display:flex;flex-direction:column;gap:2px;min-width:0}
+.preset-name{font-size:.85rem;font-weight:600}
+.preset-sub{font-size:.68rem;color:var(--text-dimmer);font-weight:500}
+@media (max-width:480px){.preset-sub{display:none}.preset{padding:12px 10px}.preset-name{font-size:.78rem}}
+
+/* DEVICES HEADER */
+.devices-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:10px;animation:fadeUp .5s both;animation-delay:.08s;
+}
+.devices-count{font-size:.75rem;color:var(--text-dimmer);font-weight:600}
+.devices-count strong{color:var(--accent);font-weight:700}
+.devices-actions{display:flex;gap:6px}
+.dev-action{
+  padding:6px 12px;border-radius:9px;background:var(--input-bg);
+  border:1px solid transparent;color:var(--text-dim);
+  font-family:inherit;font-size:.7rem;font-weight:600;
+  cursor:pointer;transition:all .18s;
+}
+.dev-action:hover{color:var(--accent);background:var(--accent-soft);border-color:rgba(139,92,246,.2)}
+
+/* DEVICES */
+.devices{display:flex;flex-direction:column;gap:8px;animation:fadeUp .5s both;animation-delay:.1s}
+.device{
+  display:grid;grid-template-columns:22px 44px 1fr auto auto;
+  gap:12px;align-items:center;
+  padding:12px 14px;background:var(--card);border:1px solid var(--border);border-radius:16px;
+  backdrop-filter:blur(12px);transition:all .22s cubic-bezier(.34,1.4,.64,1);
+  position:relative;overflow:hidden;
+}
+.device::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:linear-gradient(180deg,var(--accent),var(--accent-2));
+  opacity:0;transition:opacity .2s;
+}
+.device:focus-within{border-color:var(--accent);background:var(--card-hover);transform:translateY(-2px);box-shadow:0 12px 28px -12px var(--accent-glow)}
+.device:focus-within::before{opacity:1}
+.device.error{border-color:var(--error);background:var(--error-soft);animation:shake .4s}
+.device.error::before{background:var(--error);opacity:1}
+.device.filled .dev-icon{color:var(--accent);background:var(--accent-soft)}
+.device.error .dev-icon{color:var(--error);background:var(--error-soft)}
+.device.disabled{opacity:.42;filter:saturate(.4)}
+.device.disabled::before{display:none}
+.device.disabled .qty-box,
+.device.disabled .price-wrap{pointer-events:none;opacity:.6}
+.device.disabled .dev-name{text-decoration:line-through;text-decoration-thickness:1.5px;text-decoration-color:var(--text-dimmer)}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+
+/* Checkbox */
+.dev-check{position:relative;width:22px;height:22px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.dev-check input{position:absolute;inset:0;opacity:0;cursor:pointer;margin:0;z-index:1}
+.dev-check-box{
+  position:absolute;inset:0;border-radius:50%;
+  border:2px solid var(--border-strong);
+  background:var(--input-bg);
+  transition:all .2s cubic-bezier(.34,1.4,.64,1);
+  display:flex;align-items:center;justify-content:center;
+}
+.dev-check input:checked + .dev-check-box{
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  border-color:transparent;
+  box-shadow:0 4px 12px -2px var(--accent-glow);
+}
+.dev-check-box::after{
+  content:'';width:4px;height:8px;
+  border:2px solid #fff;border-top:0;border-left:0;
+  transform:rotate(45deg) translate(-1px,-1px);
+  opacity:0;transition:opacity .15s;
+  margin-top:-2px;
+}
+.dev-check input:checked + .dev-check-box::after{opacity:1}
+.dev-check:hover .dev-check-box{border-color:var(--accent)}
+.dev-check input:active + .dev-check-box{transform:scale(.9)}
+
+.dev-icon{width:44px;height:44px;border-radius:13px;background:var(--input-bg);color:var(--text-dimmer);display:flex;align-items:center;justify-content:center;transition:all .2s}
+.dev-icon svg{width:20px;height:20px}
+.dev-info{display:flex;flex-direction:column;gap:2px;min-width:0}
+.dev-name{font-size:.92rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .2s}
+.dev-hint{font-size:.7rem;color:var(--text-dimmer);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;height:12px;line-height:12px;transition:color .2s}
+.dev-hint.active{color:var(--text-dim)}
+.dev-hint.error{color:var(--error);font-weight:600}
+
+.qty-box{display:flex;align-items:center;background:var(--input-bg);border-radius:10px;border:1px solid transparent;overflow:hidden;transition:all .2s}
+.device:focus-within .qty-box{border-color:var(--border-strong)}
+.qty-btn{width:26px;height:36px;border:none;background:transparent;color:var(--text-dimmer);cursor:pointer;font-size:15px;font-weight:600;transition:all .15s;display:flex;align-items:center;justify-content:center;font-family:inherit}
+.qty-btn:hover{color:var(--accent);background:var(--accent-soft)}
+.qty-btn:active{transform:scale(.9)}
+.qty-input{width:32px;height:36px;text-align:center;background:transparent;border:none;color:var(--text);font-size:.85rem;font-weight:700;font-family:inherit;-moz-appearance:textfield;font-variant-numeric:tabular-nums}
+.qty-input::-webkit-outer-spin-button,.qty-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+
+.price-wrap{position:relative;width:140px;flex-shrink:0}
+.price-input{
+  width:100%;padding:11px 30px 11px 12px;background:var(--input-bg);border:1px solid transparent;
+  border-radius:11px;color:var(--accent);font-size:1rem;font-weight:700;text-align:right;
+  font-family:inherit;font-variant-numeric:tabular-nums;transition:all .2s;
+}
+.price-input::placeholder{color:var(--text-dimmer);font-weight:500}
+.price-input:focus{background:var(--input-bg-focus);border-color:var(--border-strong)}
+.device.error .price-input{color:var(--error)}
+.currency{position:absolute;right:11px;top:50%;transform:translateY(-50%);color:var(--text-dimmer);font-size:.85rem;font-weight:700;pointer-events:none;transition:color .2s}
+.device:focus-within .currency{color:var(--accent)}
+.device.error .currency{color:var(--error)}
+
+@media (max-width:640px){
+  .device{grid-template-columns:22px 40px 1fr auto;gap:10px}
+  .dev-check{align-self:center}
+  .dev-icon{width:40px;height:40px}
+  .dev-icon svg{width:18px;height:18px}
+  .dev-info{grid-column:3/5}
+  .qty-box{grid-row:2;grid-column:2;justify-self:start}
+  .price-wrap{grid-row:2;grid-column:3/5;width:100%}
+}
+@media (max-width:380px){.qty-box{display:none}}
+
+/* SIDEBAR */
+.sidebar{position:sticky;top:28px;display:flex;flex-direction:column;gap:16px;animation:fadeUp .5s both;animation-delay:.15s}
+@media (max-width:900px){.sidebar{position:static}}
+.card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:20px;backdrop-filter:blur(16px)}
+.summary-card{display:flex;flex-direction:column;gap:16px}
+.field-label{font-size:.7rem;font-weight:700;color:var(--text-dimmer);text-transform:uppercase;letter-spacing:.09em;display:flex;align-items:center;gap:6px;margin-bottom:8px}
+.field-label svg{width:12px;height:12px}
+.budget-row .price-wrap{width:100%}
+.budget-row .price-input{font-size:.9rem;padding:9px 26px 9px 10px}
+.progress-track{position:relative;height:8px;border-radius:4px;background:var(--input-bg);overflow:hidden;margin-top:10px}
+.progress-fill{position:absolute;left:0;top:0;bottom:0;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:4px;transition:width .5s cubic-bezier(.34,1.4,.64,1),background .3s}
+.progress-fill.over{background:linear-gradient(90deg,#f59e0b,#ef4444)}
+.progress-info{display:flex;justify-content:space-between;font-size:.72rem;color:var(--text-dimmer);font-weight:600;margin-top:8px}
+.discount-row{display:flex;align-items:center;gap:8px;background:var(--input-bg);border-radius:12px;padding:4px}
+.discount-row .field-label{margin:0 8px 0 10px;flex:1}
+.discount-row input{width:60px;padding:9px 10px;text-align:right;background:transparent;border:none;color:var(--accent);font-size:.95rem;font-weight:700;font-family:inherit;font-variant-numeric:tabular-nums}
+.discount-row .pct{color:var(--text-dimmer);font-weight:700;padding-right:10px;font-size:.85rem}
+.divider{height:1px;background:var(--border)}
+.total-block{text-align:center;padding:4px 0}
+.total-label{font-size:.68rem;font-weight:700;color:var(--text-dimmer);text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px}
+.total-value{
+  font-size:2.4rem;font-weight:800;letter-spacing:-.03em;line-height:1;display:flex;align-items:baseline;
+  justify-content:center;gap:6px;font-variant-numeric:tabular-nums;
+  background:linear-gradient(135deg,var(--text) 40%,var(--accent) 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;transition:all .3s;
+}
+.total-value.over{background:linear-gradient(135deg,var(--error),#f59e0b);-webkit-background-clip:text;background-clip:text;color:transparent}
+.total-value .rub{font-size:1.3rem;font-weight:700}
+.total-original{font-size:.75rem;color:var(--text-dimmer);font-weight:600;margin-top:8px}
+.actions-primary{display:flex;gap:8px}
+.btn{
+  padding:14px 18px;border:none;border-radius:13px;font-family:inherit;font-weight:700;font-size:.9rem;
+  cursor:pointer;transition:all .2s cubic-bezier(.34,1.4,.64,1);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn svg{width:16px;height:16px}
+.btn-primary{
+  flex:1;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;
+  box-shadow:0 10px 24px -8px var(--accent-glow);position:relative;overflow:hidden;
+}
+.btn-primary::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.2),transparent);pointer-events:none}
+.btn-primary:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 14px 32px -8px var(--accent-glow);filter:brightness(1.08)}
+.btn-primary:active:not(:disabled){transform:translateY(0)}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+.btn-secondary{background:var(--input-bg);color:var(--text-dim);border:1px solid var(--border)}
+.btn-secondary:hover{color:var(--text);background:var(--card-hover);border-color:var(--border-strong)}
+.actions-mini{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.mini-btn{
+  padding:10px 6px;border-radius:11px;background:var(--input-bg);border:1px solid transparent;
+  color:var(--text-dim);font-family:inherit;font-size:.72rem;font-weight:600;cursor:pointer;
+  transition:all .18s;display:flex;flex-direction:column;align-items:center;gap:4px;
+}
+.mini-btn svg{width:15px;height:15px}
+.mini-btn:hover{color:var(--accent);background:var(--accent-soft);border-color:rgba(139,92,246,.2);transform:translateY(-2px)}
+
+/* HISTORY */
+.history-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.history-head h3{font-size:.72rem;font-weight:700;color:var(--text-dimmer);text-transform:uppercase;letter-spacing:.09em;display:flex;align-items:center;gap:6px}
+.history-head h3 svg{width:12px;height:12px}
+.history-clear{font-size:.7rem;font-weight:600;color:var(--text-dimmer);background:none;border:none;cursor:pointer;font-family:inherit;transition:color .2s}
+.history-clear:hover{color:var(--error)}
+.history-empty{text-align:center;color:var(--text-dimmer);font-size:.8rem;padding:18px 0;font-weight:500}
+.history-item{
+  display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:11px;
+  background:var(--input-bg);margin-bottom:6px;cursor:pointer;transition:all .18s;
+  border:1px solid transparent;font-family:inherit;color:var(--text);
+  width:100%;text-align:left;
+}
+.history-item:hover{background:var(--accent-soft);border-color:rgba(139,92,246,.25);transform:translateX(2px)}
+.history-item:last-child{margin-bottom:0}
+.hi-left{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.hi-time{font-size:.68rem;color:var(--text-dimmer);font-weight:600}
+.hi-count{font-size:.72rem;color:var(--text-dim);font-weight:600}
+.hi-total{font-size:.88rem;font-weight:800;color:var(--accent);white-space:nowrap;font-variant-numeric:tabular-nums}
+
+/* MODAL & CHART */
+.modal{
+  position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.7);backdrop-filter:blur(14px);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  opacity:0;visibility:hidden;transition:all .28s;
+}
+.modal.active{opacity:1;visibility:visible}
+.modal-box{
+  background:var(--card-solid);border:1px solid var(--border-strong);border-radius:26px;
+  padding:30px 26px;width:100%;max-width:440px;max-height:90vh;
+  display:flex;flex-direction:column;box-shadow:var(--shadow);
+  transform:scale(.94) translateY(10px);
+  transition:transform .35s cubic-bezier(.34,1.4,.64,1);
+}
+.modal.active .modal-box{transform:scale(1) translateY(0)}
+.modal-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px}
+.modal-title{font-size:.72rem;font-weight:700;color:var(--text-dimmer);text-transform:uppercase;letter-spacing:.12em;display:flex;align-items:center;gap:6px}
+.modal-title svg{width:13px;height:13px}
+.modal-close{width:30px;height:30px;border-radius:9px;border:none;background:var(--input-bg);color:var(--text-dim);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.modal-close:hover{background:var(--error-soft);color:var(--error)}
+.modal-close svg{width:15px;height:15px}
+.modal-total{text-align:center;padding:8px 0 24px}
+.modal-total-value{
+  font-size:3rem;font-weight:800;letter-spacing:-.035em;line-height:1;display:flex;align-items:baseline;justify-content:center;gap:8px;
+  font-variant-numeric:tabular-nums;
+  background:linear-gradient(135deg,var(--text) 30%,var(--accent) 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.modal-total-value .rub{font-size:1.6rem;font-weight:700}
+.modal-total-note{font-size:.78rem;color:var(--text-dimmer);font-weight:600;margin-top:8px}
+.modal-total-note strong{color:var(--success);font-weight:700}
+
+.chart-container{display:flex;justify-content:center;margin-bottom:20px;position:relative;width:120px;height:120px;margin-left:auto;margin-right:auto}
+.chart-svg{transform:rotate(-90deg);width:100%;height:100%}
+.chart-segment{fill:none;stroke-width:8;stroke-linecap:round;transition: stroke-dasharray 0.6s cubic-bezier(0.34, 1.4, 0.64, 1);}
+.chart-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:.7rem;color:var(--text-dimmer);font-weight:600;text-align:center}
+
+.breakdown{max-height:200px;overflow-y:auto;padding-right:6px;margin-bottom:22px}
+.breakdown::-webkit-scrollbar{width:4px}
+.breakdown::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:2px}
+.bd-row{
+  display:grid;grid-template-columns:26px 1fr auto;gap:10px;align-items:center;
+  padding:10px 0;border-bottom:1px solid var(--border);font-size:.85rem;
+  animation:bdRowIn .45s cubic-bezier(.34,1.4,.64,1) both;
+}
+.bd-row:last-child{border-bottom:none}
+@keyframes bdRowIn{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:translateX(0)}}
+.bd-icon{width:26px;height:26px;border-radius:8px;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center}
+.bd-icon svg{width:13px;height:13px}
+.bd-main{display:flex;flex-direction:column;gap:3px;min-width:0}
+.bd-name{font-weight:600;color:var(--text);font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bd-bar{height:3px;background:var(--input-bg);border-radius:2px;overflow:hidden}
+.bd-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:2px;width:0;animation:barGrow .75s cubic-bezier(.34,1.4,.64,1) both}
+@keyframes barGrow{from{width:0}to{width:var(--pct)}}
+.bd-val{font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;font-size:.85rem;white-space:nowrap}
+.modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.modal-actions .btn{padding:13px;font-size:.83rem}
+
+/* TOAST & CONFETTI */
+.toast-wrap{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:300;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.toast{
+  background:var(--card-solid);border:1px solid var(--border-strong);color:var(--text);
+  padding:12px 18px;border-radius:14px;font-size:.85rem;font-weight:600;font-family:inherit;
+  display:flex;align-items:center;gap:10px;box-shadow:var(--shadow);
+  animation:toastIn .32s cubic-bezier(.34,1.4,.64,1);pointer-events:auto;
+}
+.toast svg{width:16px;height:16px}
+.toast.success svg{color:var(--success)}
+.toast.error svg{color:var(--error)}
+.toast.info svg{color:var(--accent)}
+.toast.out{animation:toastOut .24s ease forwards}
+@keyframes toastIn{from{opacity:0;transform:translateY(20px) scale(.9)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes toastOut{to{opacity:0;transform:translateY(12px) scale(.95)}}
+
+#confetti-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:999}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.footer-note{text-align:center;margin-top:40px;font-size:.72rem;color:var(--text-dimmer);font-weight:500}
+.footer-note kbd{font-family:inherit;font-size:.68rem;font-weight:700;padding:2px 6px;border-radius:5px;background:var(--input-bg);border:1px solid var(--border);color:var(--text-dim)}
+</style>
+</head>
+<body>
+
+<div class="bg-orbs">
+  <div class="orb orb-1" id="orb1"></div>
+  <div class="orb orb-2" id="orb2"></div>
+  <div class="orb orb-3" id="orb3"></div>
+</div>
+<canvas id="confetti-canvas"></canvas>
+
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark"><i data-lucide="calculator"></i></div>
+      <div><div class="brand-text">Bilab</div></div>
+      <div class="brand-badge" id="brandBadge">smart</div>
+    </div>
+    <div class="topbar-actions">
+      <button class="icon-btn lang-btn" id="langToggle" title="Language">
+        <span class="fi fi-ru" id="langFlag"></span>
+        <span class="lang-code" id="langCode">RU</span>
+      </button>
+      <button class="icon-btn" id="themeToggle" title="Theme"><i data-lucide="moon"></i></button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <main>
+      <div class="presets" id="presets"></div>
+      <div class="devices-header">
+        <div class="devices-count" id="devicesCount"></div>
+        <div class="devices-actions">
+          <button class="dev-action" id="btnSelectAll"></button>
+          <button class="dev-action" id="btnSelectNone"></button>
+        </div>
+      </div>
+      <div class="devices" id="devices"></div>
+    </main>
+
+    <aside class="sidebar">
+      <div class="card summary-card">
+        <div>
+          <div class="field-label"><i data-lucide="wallet"></i> <span id="lblBudgetText"></span></div>
+          <div class="budget-row">
+            <div class="price-wrap">
+              <input type="text" class="price-input" id="budgetInput" placeholder="Не задан" inputmode="decimal" autocomplete="off">
+              <span class="currency">₽</span>
+            </div>
+          </div>
+          <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+          <div class="progress-info">
+            <span id="progressUsed">0 ₽</span>
+            <span id="progressPct">—</span>
+          </div>
+        </div>
+
+        <div>
+          <div class="field-label"><i data-lucide="percent"></i> <span id="lblDiscountText"></span></div>
+          <div class="discount-row">
+            <input type="number" id="discountInput" min="0" max="90" value="0" inputmode="numeric">
+            <span class="pct">%</span>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="total-block">
+          <div class="total-label" id="lblTotalText">Итого</div>
+          <div class="total-value" id="totalValue">0 <span class="rub">₽</span></div>
+          <div class="total-original" id="totalOriginal" style="display:none"></div>
+        </div>
+
+        <div class="actions-primary">
+          <button class="btn btn-primary" id="btnCalc" disabled><i data-lucide="sparkles"></i> <span id="btnCalcText">Рассчитать</span></button>
+          <button class="btn btn-secondary" id="btnReset" title="Reset"><i data-lucide="rotate-ccw"></i></button>
+        </div>
+
+        <div class="actions-mini">
+          <button class="mini-btn" id="btnShare"><i data-lucide="share-2"></i><span id="miniShareText">Ссылка</span></button>
+          <button class="mini-btn" id="btnExport"><i data-lucide="download"></i><span id="miniExportText">JSON</span></button>
+          <button class="mini-btn" id="btnImport"><i data-lucide="upload"></i><span id="miniImportText">Импорт</span></button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="history-head">
+          <h3><i data-lucide="history"></i> <span id="lblHistoryText"></span></h3>
+          <button class="history-clear" id="historyClear"><span id="lblHistoryClearText"></span></button>
+        </div>
+        <div id="historyList"></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="footer-note" id="footerNote"></div>
+</div>
+
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-title"><i data-lucide="receipt"></i> <span id="modalTitleText"></span></div>
+      <button class="modal-close" id="modalClose"><i data-lucide="x"></i></button>
+    </div>
+
+    <div class="chart-container" id="chartContainer">
+      <svg class="chart-svg" viewBox="0 0 36 36"></svg>
+      <div class="chart-center" id="chartCenter"></div>
+    </div>
+
+    <div class="modal-total">
+      <div class="modal-total-value" id="modalTotal">0 <span class="rub">₽</span></div>
+      <div class="modal-total-note" id="modalNote"></div>
+    </div>
+    <div class="breakdown" id="breakdown"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="modalCopy"><i data-lucide="copy"></i> <span id="modalCopyText"></span></button>
+      <button class="btn btn-primary" id="modalCloseBtn"><i data-lucide="check"></i> <span id="modalDoneText"></span></button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+<input type="file" id="fileInput" accept=".json" style="display:none">
+
+<script>
+/* ═══════════ i18n ═══════════ */
+const I18N = {
+  ru: {
+    flagCode:'ru', code:'RU', locale:'ru-RU', htmlLang:'ru',
+    title:'Bilab — Умный калькулятор девайсов', brandBadge:'умный',
+    devices:{pc:'Системный блок',monitor:'Монитор',mouse:'Мышь',keyboard:'Клавиатура',mousepad:'Коврик',headphones:'Наушники',microphone:'Микрофон'},
+    presets:{
+      budget:{name:'Бюджет',sub:'~66k ₽'}, mid:{name:'Средний',sub:'~188k ₽'}, pro:{name:'Про',sub:'~566k ₽'}
+    },
+    ui:{
+      budgetLabel:'Лимит бюджета', budgetPlaceholder:'Не задан',
+      discount:'Скидка', total:'Итого', calculate:'Рассчитать',
+      share:'Ссылка', export:'JSON', import:'Импорт',
+      history:'История', clear:'Очистить', historyEmpty:'Здесь появятся ваши расчёты',
+      limitNotSet:'Лимит не задан', budgetOf:'от', withoutDiscount:'Без скидки',
+      modalTitle:'Детализация расчёта', modalCopy:'Копировать', modalDone:'Готово',
+      chartPositions:'позиций',
+      selectAll:'Все', selectNone:'Ничего',
+      selectedOf:(a,b)=>`Выбрано <strong>${a}</strong> из ${b}`
+    },
+    hints:{
+      range:(a,b)=>`${a} — ${b} ₽`,
+      min:v=>`Минимум: ${v} ₽`,
+      max:v=>`Максимум: ${v} ₽`,
+      qty:(q,p,s)=>`${q} × ${p} = ${s} ₽`,
+      off:'Выключено — нажмите на кружок слева'
+    },
+    toasts:{
+      presetApplied:n=>`Пресет «${n}» применён`,
+      checkFields:'Проверьте подсвеченные поля',
+      reset:'Сброшено', historyCleared:'История очищена',
+      linkCopied:'Ссылка скопирована', copyFail:'Не удалось скопировать',
+      exported:'Отчёт сохранён', imported:'Импортировано',
+      importFail:'Неверный формат файла', historyRestored:'Расчёт восстановлен',
+      nothingToExport:'Нечего экспортировать', shareFail:'Не удалось создать ссылку',
+      copied:'Скопировано', langChanged:'Язык: Русский',
+      allOn:'Все девайсы включены', allOff:'Все девайсы выключены'
+    },
+    confirm:{reset:'Сбросить все введённые данные?', clearHistory:'Очистить историю?'},
+    prompt:{copyLink:'Скопируйте ссылку:'},
+    plural:n=>{const a=n%10,b=n%100;if(a===1&&b!==11)return'позиция';if(a>=2&&a<=4&&(b<10||b>=20))return'позиции';return'позиций'},
+    report:{header:'Bilab — расчёт', subtotal:'Подытог', discount:'Скидка', total:'Итого', budget:'Бюджет'}
+  },
+  en: {
+    flagCode:'gb', code:'EN', locale:'en-US', htmlLang:'en',
+    title:'Bilab — Smart Device Calculator', brandBadge:'smart',
+    devices:{pc:'System Unit',monitor:'Monitor',mouse:'Mouse',keyboard:'Keyboard',mousepad:'Mousepad',headphones:'Headphones',microphone:'Microphone'},
+    presets:{
+      budget:{name:'Budget',sub:'~66k ₽'}, mid:{name:'Mid-range',sub:'~188k ₽'}, pro:{name:'Pro',sub:'~566k ₽'}
+    },
+    ui:{
+      budgetLabel:'Budget Limit', budgetPlaceholder:'Not set',
+      discount:'Discount', total:'Total', calculate:'Calculate',
+      share:'Link', export:'JSON', import:'Import',
+      history:'History', clear:'Clear', historyEmpty:'Your calculations will appear here',
+      limitNotSet:'Limit not set', budgetOf:'of', withoutDiscount:'Without discount',
+      modalTitle:'Calculation Details', modalCopy:'Copy', modalDone:'Done',
+      chartPositions:'items',
+      selectAll:'All', selectNone:'None',
+      selectedOf:(a,b)=>`<strong>${a}</strong> of ${b} selected`
+    },
+    hints:{
+      range:(a,b)=>`${a} — ${b} ₽`,
+      min:v=>`Min: ${v} ₽`,
+      max:v=>`Max: ${v} ₽`,
+      qty:(q,p,s)=>`${q} × ${p} = ${s} ₽`,
+      off:'Disabled — click the circle on the left'
+    },
+    toasts:{
+      presetApplied:n=>`Preset "${n}" applied`,
+      checkFields:'Check highlighted fields',
+      reset:'Reset', historyCleared:'History cleared',
+      linkCopied:'Link copied', copyFail:'Copy failed',
+      exported:'Report saved', imported:'Imported',
+      importFail:'Invalid file format', historyRestored:'Calculation restored',
+      nothingToExport:'Nothing to export', shareFail:'Failed to create link',
+      copied:'Copied', langChanged:'Language: English',
+      allOn:'All devices enabled', allOff:'All devices disabled'
+    },
+    confirm:{reset:'Reset all entered data?', clearHistory:'Clear history?'},
+    prompt:{copyLink:'Copy the link:'},
+    plural:n=>n===1?'item':'items',
+    report:{header:'Bilab — Estimate', subtotal:'Subtotal', discount:'Discount', total:'Total', budget:'Budget'}
+  }
+};
+const LANG_KEY = 'bilab-lang';
+let lang = 'ru';
+function detectLang(){
+  try{const s=localStorage.getItem(LANG_KEY);if(s==='ru'||s==='en')return s}catch(e){}
+  try{const n=(navigator.language||'ru').toLowerCase();return n.startsWith('ru')?'ru':'en'}catch(e){return 'ru'}
+}
+
+/* ═══════════ CONFIG ═══════════ */
+const DEVICES = [
+  {id:'pc',icon:'cpu',min:15000,max:2500000},
+  {id:'monitor',icon:'monitor',min:5000,max:400000},
+  {id:'mouse',icon:'mouse',min:300,max:25000},
+  {id:'keyboard',icon:'keyboard',min:500,max:40000},
+  {id:'mousepad',icon:'square',min:100,max:15000},
+  {id:'headphones',icon:'headphones',min:500,max:80000},
+  {id:'microphone',icon:'mic',min:800,max:60000},
+];
+const PRESETS = {
+  budget:{icon:'piggy-bank',prices:{pc:45000,monitor:12000,mouse:1500,keyboard:2500,mousepad:500,headphones:3000,microphone:2500}},
+  mid:{icon:'zap',prices:{pc:120000,monitor:35000,mouse:5000,keyboard:7000,mousepad:1500,headphones:12000,microphone:8000}},
+  pro:{icon:'gem',prices:{pc:350000,monitor:120000,mouse:12000,keyboard:18000,mousepad:4000,headphones:35000,microphone:25000}}
+};
+const STORAGE_KEY = 'bilab-v5';
+const HISTORY_KEY = 'bilab-history-v5';
+const COLORS = ['#8b5cf6','#06b6d4','#ec4899','#f59e0b','#10b981','#6366f1','#ef4444'];
+
+/* ═══════════ STATE ═══════════ */
+const state = {};
+DEVICES.forEach(d => state[d.id] = { price:null, qty:1, enabled:true });
+let budget = 0, discount = 0, activePreset = null, history = [];
+
+/* ═══════════ AUDIO ═══════════ */
+let audioCtx = null;
+function playSound(type){
+  if (!audioCtx) { try { audioCtx = new (window.AudioContext||window.webkitAudioContext)(); } catch(e){return} }
+  try {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    const now = audioCtx.currentTime;
+    if (type === 'click') {
+      osc.type = 'sine'; osc.frequency.setValueAtTime(800, now);
+      osc.frequency.exponentialRampToValueAtTime(400, now + .08);
+      gain.gain.setValueAtTime(.05, now); gain.gain.exponentialRampToValueAtTime(.001, now + .08);
+      osc.start(now); osc.stop(now + .08);
+    } else if (type === 'success') {
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(523.25, now);
+      osc.frequency.setValueAtTime(659.25, now + .1);
+      osc.frequency.setValueAtTime(783.99, now + .2);
+      gain.gain.setValueAtTime(.08, now); gain.gain.linearRampToValueAtTime(0, now + .4);
+      osc.start(now); osc.stop(now + .4);
+    } else if (type === 'error') {
+      osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, now);
+      osc.frequency.linearRampToValueAtTime(100, now + .15);
+      gain.gain.setValueAtTime(.06, now); gain.gain.linearRampToValueAtTime(0, now + .15);
+      osc.start(now); osc.stop(now + .15);
+    }
+  } catch(e){}
+}
+
+/* ══════════ CONFETTI ═══════════ */
+const canvas = document.getElementById('confetti-canvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
+function resizeCanvas(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+function fireConfetti(){
+  particles = [];
+  for (let i = 0; i < 90; i++) particles.push({
+    x: window.innerWidth / 2, y: window.innerHeight / 2,
+    vx: (Math.random() - .5) * 15, vy: (Math.random() - .5) * 15 - 5,
+    color: COLORS[Math.floor(Math.random() * COLORS.length)],
+    size: Math.random() * 6 + 3, life: 1, decay: Math.random() * .02 + .01
+  });
+  animateConfetti();
+}
+function animateConfetti(){
+  if (!particles.length) return;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles = particles.filter(p => {
+    p.x += p.vx; p.y += p.vy; p.vy += .3; p.life -= p.decay;
+    ctx.globalAlpha = Math.max(0, p.life);
+    ctx.fillStyle = p.color;
+    ctx.fillRect(p.x, p.y, p.size, p.size);
+    return p.life > 0;
+  });
+  if (particles.length) requestAnimationFrame(animateConfetti);
+  else ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+/* ═══════════ PARALLAX ═══════════ */
+document.addEventListener('mousemove', e => {
+  const x = (e.clientX / window.innerWidth - .5) * 2;
+  const y = (e.clientY / window.innerHeight - .5) * 2;
+  orb1.style.transform = `translate(${x * 30}px, ${y * 30}px)`;
+  orb2.style.transform = `translate(${x * -20}px, ${y * -20}px)`;
+  orb3.style.transform = `translate(${x * 15}px, ${y * 15}px)`;
+});
+
+/* ═══════════ UTILS ═══════════ */
+const t = path => { const p = path.split('.'); let v = I18N[lang]; for (const k of p) v = v == null ? undefined : v[k]; return v === undefined ? path : v; };
+const fmt = n => Math.round(n).toLocaleString(I18N[lang].locale);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const refreshIcons = () => { try { window.lucide && window.lucide.createIcons(); } catch(e){} };
+
+function parsePrice(raw){
+  if (raw == null) return NaN;
+  let s = String(raw).trim().toLowerCase().replace(/\s+/g, '').replace(/(₽|руб\.?|р\.?|\$)/g, '').replace(',', '.');
+  let mult = 1;
+  if (s.endsWith('k') || s.endsWith('к') || s.endsWith('тыс')) { mult = 1e3; s = s.replace(/[kк]|тыс/g, ''); }
+  else if (s.endsWith('m') || s.endsWith('м') || s.endsWith('млн')) { mult = 1e6; s = s.replace(/[mм]|млн/g, ''); }
+  const n = parseFloat(s);
+  return (isNaN(n) || n < 0) ? NaN : n * mult;
+}
+function save(){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ state, budget, discount })); } catch(e){} }
+function load(){
+  try {
+    const p = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    if (p.state) DEVICES.forEach(d => {
+      const s = p.state[d.id]; if (!s) return;
+      state[d.id].price = typeof s.price === 'number' ? s.price : null;
+      state[d.id].qty = Math.min(99, Math.max(1, parseInt(s.qty) || 1));
+      state[d.id].enabled = s.enabled !== false;
+    });
+    if (typeof p.budget === 'number') budget = p.budget;
+    if (typeof p.discount === 'number') discount = p.discount;
+  } catch(e){}
+}
+function loadHistory(){ try { const r = localStorage.getItem(HISTORY_KEY); if (r) history = JSON.parse(r); } catch(e){} if (!Array.isArray(history)) history = []; }
+function saveHistory(){ try { localStorage.setItem(HISTORY_KEY, JSON.stringify(history)); } catch(e){} }
+
+function toast(msg, type='info'){
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  const icon = type === 'success' ? 'check-circle' : type === 'error' ? 'alert-circle' : 'info';
+  el.innerHTML = `<i data-lucide="${icon}"></i><span>${esc(msg)}</span>`;
+  toastWrap.appendChild(el); refreshIcons();
+  setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 240); }, 2400);
+}
+
+/* ═══════════ TRANSLATIONS ═══════════ */
+function applyStaticTranslations(){
+  document.documentElement.lang = I18N[lang].htmlLang;
+  document.title = I18N[lang].title;
+  brandBadge.textContent = t('brandBadge');
+  lblBudgetText.textContent = t('ui.budgetLabel');
+  budgetInput.placeholder = t('ui.budgetPlaceholder');
+  lblDiscountText.textContent = t('ui.discount');
+  lblTotalText.textContent = t('ui.total');
+  btnCalcText.textContent = t('ui.calculate');
+  miniShareText.textContent = t('ui.share');
+  miniExportText.textContent = t('ui.export');
+  miniImportText.textContent = t('ui.import');
+  lblHistoryText.textContent = t('ui.history');
+  lblHistoryClearText.textContent = t('ui.clear');
+  modalTitleText.textContent = t('ui.modalTitle');
+  modalCopyText.textContent = t('ui.modalCopy');
+  modalDoneText.textContent = t('ui.modalDone');
+  btnSelectAll.textContent = t('ui.selectAll');
+  btnSelectNone.textContent = t('ui.selectNone');
+  footerNote.innerHTML = `<kbd>Enter</kbd> — ${lang==='ru'?'следующее поле':'next field'} · <kbd>Ctrl</kbd>+<kbd>Enter</kbd> — ${lang==='ru'?'расчёт':'calculate'} · <kbd>Esc</kbd> — ${lang==='ru'?'закрыть':'close'}`;
+  langFlag.className = 'fi fi-' + I18N[lang].flagCode;
+  langCode.textContent = I18N[lang].code;
+  langToggle.title = lang === 'ru' ? 'Switch to English' : 'Переключить на русский';
+  refreshIcons();
+}
+
+/* ═══════════ PRESETS ═══════════ */
+function renderPresets(){
+  presets.innerHTML = Object.entries(PRESETS).map(([k,p]) => {
+    const m = I18N[lang].presets[k];
+    return `<button class="preset${activePreset === k ? ' active' : ''}" data-preset="${k}">
+      <span class="preset-icon"><i data-lucide="${p.icon}"></i></span>
+      <span class="preset-text"><span class="preset-name">${m.name}</span><span class="preset-sub">${m.sub}</span></span>
+    </button>`;
+  }).join('');
+  presets.querySelectorAll('.preset').forEach(b => b.addEventListener('click', () => { playSound('click'); applyPreset(b.dataset.preset); }));
+  refreshIcons();
+}
+function applyPreset(key){
+  const p = PRESETS[key]; if (!p) return;
+  DEVICES.forEach(d => {
+    if (p.prices[d.id] != null) {
+      state[d.id].price = p.prices[d.id];
+      state[d.id].qty = 1;
+      state[d.id].enabled = true;
+    }
+  });
+  activePreset = key;
+  renderPresets();
+  refreshAllInputs();
+  syncEnabledClasses();
+  updateCount();
+  updateAll();
+  save();
+  toast(t('toasts.presetApplied')(I18N[lang].presets[key].name), 'success');
+  playSound('success');
+}
+
+/* ══════════ DEVICES ═══════════ */
+const deviceRefs = {};
+function renderDevices(){
+  const frag = document.createDocumentFragment();
+  devices.innerHTML = '';
+  deviceRefs.length = 0;
+
+  DEVICES.forEach(d => {
+    const label = t('devices.' + d.id);
+    const row = document.createElement('div');
+    row.className = 'device' + (state[d.id].enabled ? '' : ' disabled');
+    row.dataset.id = d.id;
+    row.innerHTML = `
+      <label class="dev-check" title="${esc(t('ui.selectAll'))}">
+        <input type="checkbox" ${state[d.id].enabled ? 'checked' : ''}>
+        <span class="dev-check-box"></span>
+      </label>
+      <div class="dev-icon"><i data-lucide="${d.icon}"></i></div>
+      <div class="dev-info"><div class="dev-name">${label}</div><div class="dev-hint" data-hint></div></div>
+      <div class="qty-box">
+        <button class="qty-btn" data-qty="-1" tabindex="-1">−</button>
+        <input type="number" class="qty-input" min="1" max="99" value="${state[d.id].qty}">
+        <button class="qty-btn" data-qty="1" tabindex="-1">+</button>
+      </div>
+      <div class="price-wrap">
+        <input type="text" class="price-input" placeholder="0" inputmode="decimal" autocomplete="off">
+        <span class="currency">₽</span>
+      </div>`;
+    frag.appendChild(row);
+
+    const ref = {
+      row,
+      check: row.querySelector('.dev-check input'),
+      price: row.querySelector('.price-input'),
+      qty: row.querySelector('.qty-input'),
+      hint: row.querySelector('.dev-hint')
+    };
+    deviceRefs[d.id] = ref;
+
+    if (typeof state[d.id].price === 'number') ref.price.value = fmt(state[d.id].price);
+    ref.hint.textContent = t('hints.range')(fmt(d.min), fmt(d.max));
+
+    ref.price.addEventListener('input', () => onPriceInput(d.id));
+    ref.price.addEventListener('blur', () => onPriceBlur(d.id));
+    ref.price.addEventListener('keydown', e => onKeyNav(e, ref.price));
+    ref.qty.addEventListener('input', () => onQtyInput(d.id));
+    ref.qty.addEventListener('blur', () => { ref.qty.value = state[d.id].qty; });
+    ref.check.addEventListener('change', () => toggleDevice(d.id));
+
+    row.querySelectorAll('.qty-btn').forEach(b => b.addEventListener('click', () => {
+      playSound('click');
+      let q = (parseInt(ref.qty.value) || 1) + parseInt(b.dataset.qty);
+      q = Math.max(1, Math.min(99, q));
+      ref.qty.value = q; state[d.id].qty = q;
+      validateRow(d.id); updateAll(); save();
+    }));
+  });
+  devices.appendChild(frag);
+  refreshIcons();
+  DEVICES.forEach(d => { if (state[d.id].price != null) validateRow(d.id); });
+  updateCount();
+}
+
+function toggleDevice(id){
+  const enabled = deviceRefs[id].check.checked;
+  state[id].enabled = enabled;
+  const row = deviceRefs[id].row;
+  row.classList.toggle('disabled', !enabled);
+  playSound('click');
+  validateRow(id);
+  updateCount();
+  updateAll();
+  save();
+}
+
+function refreshAllInputs(){
+  DEVICES.forEach(d => {
+    const r = deviceRefs[d.id]; if (!r) return;
+    r.price.value = state[d.id].price != null ? fmt(state[d.id].price) : '';
+    r.qty.value = state[d.id].qty;
+    r.check.checked = state[d.id].enabled;
+    validateRow(d.id);
+  });
+}
+function syncEnabledClasses(){
+  DEVICES.forEach(d => {
+    const r = deviceRefs[d.id]; if (!r) return;
+    r.row.classList.toggle('disabled', !state[d.id].enabled);
+    r.check.checked = state[d.id].enabled;
+  });
+}
+
+/* ═══════════ INPUT ═══════════ */
+function onPriceInput(id){
+  const r = deviceRefs[id];
+  const parsed = parsePrice(r.price.value);
+  state[id].price = (isNaN(parsed) || parsed <= 0) ? null : parsed;
+  r.row.classList.remove('error');
+  validateRow(id); updateAll(); save(); autoDetectPreset();
+}
+function onPriceBlur(id){
+  const r = deviceRefs[id], p = state[id].price;
+  if (typeof p === 'number' && p > 0) r.price.value = fmt(p);
+  else if (!r.price.value.trim()) r.price.value = '';
+}
+function onQtyInput(id){
+  const r = deviceRefs[id];
+  let q = parseInt(r.qty.value);
+  if (isNaN(q) || q < 1) q = 1; if (q > 99) q = 99;
+  state[id].qty = q; validateRow(id); updateAll(); save();
+}
+function onKeyNav(e, el){
+  if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey) {
+    e.preventDefault();
+    const inputs = DEVICES.filter(d => state[d.id].enabled).map(d => deviceRefs[d.id].price);
+    const i = inputs.indexOf(el);
+    if (i >= 0 && i < inputs.length - 1) { inputs[i + 1].focus(); inputs[i + 1].select(); }
+    else { el.blur(); triggerCalculate(); }
+  } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault();
+    const inputs = DEVICES.filter(d => state[d.id].enabled).map(d => deviceRefs[d.id].price);
+    const i = inputs.indexOf(el);
+    const next = e.key === 'ArrowDown' ? i + 1 : i - 1;
+    if (next >= 0 && next < inputs.length) inputs[next].focus();
+  }
+}
+
+/* ═══════════ VALIDATION ══════════ */
+function validateRow(id){
+  const d = DEVICES.find(x => x.id === id);
+  const r = deviceRefs[id]; if (!r || !d) return;
+  const p = state[id].price;
+  r.row.classList.remove('error', 'filled');
+  r.hint.classList.remove('error', 'active');
+
+  if (!state[id].enabled) {
+    r.hint.textContent = t('hints.off');
+    return;
+  }
+  if (p == null) { r.hint.textContent = t('hints.range')(fmt(d.min), fmt(d.max)); return; }
+  r.row.classList.add('filled');
+
+  if (p > d.max) { r.row.classList.add('error'); r.hint.classList.add('error'); r.hint.textContent = t('hints.max')(fmt(d.max)); }
+  else if (p < d.min) { r.row.classList.add('error'); r.hint.classList.add('error'); r.hint.textContent = t('hints.min')(fmt(d.min)); }
+  else {
+    const q = state[id].qty;
+    if (q > 1) { r.hint.classList.add('active'); r.hint.textContent = t('hints.qty')(q, fmt(p), fmt(p * q)); }
+    else r.hint.textContent = t('hints.range')(fmt(d.min), fmt(d.max));
+  }
+}
+
+/* ══════════ COMPUTE ═══════════ */
+function compute(){
+  let subtotal = 0, hasError = false, hasValue = false;
+  const items = [];
+  for (const d of DEVICES) {
+    const s = state[d.id];
+    if (!s.enabled) continue;
+    if (typeof s.price !== 'number' || s.price <= 0) continue;
+    if (s.price < d.min || s.price > d.max) { hasError = true; continue; }
+    const qty = s.qty || 1, sub = s.price * qty;
+    subtotal += sub; hasValue = true;
+    items.push({ id:d.id, icon:d.icon, label:t('devices.' + d.id), price:s.price, qty, subtotal:sub });
+  }
+  items.sort((a,b) => b.subtotal - a.subtotal);
+  const discountAmount = subtotal * (discount / 100);
+  const total = subtotal - discountAmount;
+  return { items, subtotal, discountAmount, total, hasError, hasValue };
+}
+
+/* ═══════════ UPDATE ═══════════ */
+function updateCount(){
+  let on = 0;
+  for (const d of DEVICES) if (state[d.id].enabled) on++;
+  devicesCount.innerHTML = t('ui.selectedOf')(on, DEVICES.length);
+}
+function updateAll(){
+  const { total, subtotal, discountAmount, hasError, hasValue } = compute();
+  totalValue.innerHTML = `${fmt(total)} <span class="rub">₽</span>`;
+  totalValue.classList.toggle('over', budget > 0 && total > budget);
+
+  if (discount > 0 && subtotal > 0) {
+    totalOriginal.style.display = 'block';
+    totalOriginal.textContent = `${t('ui.withoutDiscount')}: ${fmt(subtotal)} ₽ (−${fmt(discountAmount)} ₽)`;
+  } else totalOriginal.style.display = 'none';
+
+  if (budget > 0) {
+    const pct = Math.min(100, (total / budget) * 100);
+    progressFill.style.width = pct + '%';
+    progressFill.classList.toggle('over', total > budget);
+    progressUsed.textContent = `${fmt(total)} ₽`;
+    progressPct.textContent = `${Math.round(pct)}% ${t('ui.budgetOf')} ${fmt(budget)} ₽`;
+    progressPct.style.color = total > budget ? 'var(--error)' : '';
+  } else {
+    progressFill.style.width = '0%';
+    progressFill.classList.remove('over');
+    progressUsed.textContent = `${fmt(total)} ₽`;
+    progressPct.textContent = t('ui.limitNotSet');
+    progressPct.style.color = '';
+  }
+  btnCalc.disabled = hasError || !hasValue;
+}
+
+function autoDetectPreset(){
+  const { items } = compute();
+  if (items.length < 3) { if (activePreset !== null) { activePreset = null; renderPresets(); } return; }
+  let best = null, bestDiff = Infinity;
+  for (const [key, p] of Object.entries(PRESETS)) {
+    let diff = 0, cnt = 0;
+    for (const d of DEVICES) {
+      if (p.prices[d.id] != null && state[d.id].enabled && state[d.id].price != null) {
+        diff += Math.abs(state[d.id].price - p.prices[d.id]) / p.prices[d.id]; cnt++;
+      }
+    }
+    if (cnt >= 3) { const avg = diff / cnt; if (avg < bestDiff) { bestDiff = avg; best = key; } }
+  }
+  if (bestDiff > .05) best = null;
+  if (activePreset !== best) { activePreset = best; renderPresets(); }
+}
+
+/* ═══════════ CALCULATE & SEQUENTIAL CHART ═══════════ */
+function triggerCalculate(){
+  const { hasError, hasValue, items, total, subtotal, discountAmount } = compute();
+  if (hasError) {
+    document.querySelectorAll('.device.error').forEach(r => {
+      r.style.animation = 'none'; void r.offsetWidth; r.style.animation = '';
+    });
+    toast(t('toasts.checkFields'), 'error'); playSound('error'); return;
+  }
+  if (!hasValue) return;
+
+  buildBreakdown(items, subtotal);
+  buildChart(items, subtotal); // <-- Исправленная функция ниже
+  modal.classList.remove('active');
+  void modal.offsetWidth;
+  modal.classList.add('active');
+
+  if (discount > 0) modalNote.innerHTML = `${t('ui.discount')} ${discount}%: <strong>−${fmt(discountAmount)} ₽</strong>`;
+  else if (budget > 0 && total <= budget) modalNote.innerHTML = `${lang==='ru'?'В рамках бюджета':'Within budget'} · ${lang==='ru'?'остаток':'left'} <strong>${fmt(budget - total)} ₽</strong>`;
+  else modalNote.textContent = `${items.length} ${I18N[lang].plural(items.length)}`;
+
+  animateValue(modalTotal, 0, total, 1000);
+  
+  // Запускаем конфетти и звук после небольшой паузы, когда диаграмма начнет рисоваться
+  setTimeout(() => { 
+    fireConfetti(); 
+    playSound('success'); 
+    startTabAnimation(fmt(total)); // <-- Новая фишка с вкладкой
+  }, 300);
+  
+  addHistory({ items, total });
+}
+
+// ✅ ИСПРАВЛЕННАЯ ФУНКЦИЯ ПОСЛЕДОВАТЕЛЬНОЙ ОТРИСОВКИ
+function buildChart(items, subtotal){
+  const svg = document.querySelector('.chart-svg');
+  svg.innerHTML = '';
+  const r = 15.9155;
+  const circumference = 2 * Math.PI * r;
+  
+  // Общее время анимации ~1.4с, делим поровну между сегментами
+  const durationPerSegment = 1400 / Math.max(items.length, 1); 
+  
+  let cumulativePercent = 0;
+
+  items.forEach((it, i) => {
+    const percent = it.subtotal / subtotal;
+    const dashArray = `${percent * circumference} ${circumference}`;
+    const dashOffset = -cumulativePercent * circumference;
+    
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', 18);
+    circle.setAttribute('cy', 18);
+    circle.setAttribute('r', r);
+    circle.setAttribute('class', 'chart-segment');
+    circle.setAttribute('stroke', COLORS[i % COLORS.length]);
+    
+    // Изначально сегмент скрыт (dasharray: 0 100)
+    circle.setAttribute('stroke-dasharray', `0 ${circumference}`);
+    circle.setAttribute('stroke-dashoffset', dashOffset);
+    
+    svg.appendChild(circle);
+    
+    // Запускаем анимацию последовательно
+    setTimeout(() => {
+      circle.style.transitionDuration = `${durationPerSegment}ms`;
+      circle.setAttribute('stroke-dasharray', dashArray);
+    }, i * durationPerSegment);
+
+    cumulativePercent += percent;
+  });
+  
+  chartCenter.innerHTML = `${items.length}<br>${t('ui.chartPositions')}`;
+}
+
+function buildBreakdown(items, subtotal){
+  if (!items.length) { breakdown.innerHTML = ''; return; }
+  breakdown.innerHTML = items.map((it, i) => {
+    const pct = (it.subtotal / subtotal) * 100;
+    return `<div class="bd-row" style="animation-delay:${i * 70}ms">
+      <div class="bd-icon"><i data-lucide="${it.icon}"></i></div>
+      <div class="bd-main">
+        <div class="bd-name">${esc(it.label)}${it.qty > 1 ? ` · ${it.qty} ${lang==='ru'?'шт':'pcs'}` : ''}</div>
+        <div class="bd-bar"><div class="bd-bar-fill" style="--pct:${pct}%;animation-delay:${i*70+180}ms"></div></div>
+      </div>
+      <div class="bd-val">${fmt(it.subtotal)} ₽</div>
+    </div>`;
+  }).join('');
+  refreshIcons();
+}
+
+function animateValue(obj, start, end, dur){
+  if (end === 0) { obj.innerHTML = '0 <span class="rub">₽</span>'; return; }
+  let ts0 = null;
+  const step = ts => {
+    if (!ts0) ts0 = ts;
+    const p = Math.min((ts - ts0) / dur, 1), eased = 1 - Math.pow(1 - p, 4);
+    const cur = Math.floor(eased * (end - start) + start);
+    obj.innerHTML = `${fmt(cur)} <span class="rub">₽</span>`;
+    if (p < 1) requestAnimationFrame(step);
+    else obj.innerHTML = `${fmt(end)} <span class="rub">₽</span>`;
+  };
+  requestAnimationFrame(step);
+}
+
+/* ═══════════ TAB ANIMATION (НОВАЯ ФИШКА) ═══════════ */
+let tabAnimInterval = null;
+function startTabAnimation(amountStr) {
+  if (tabAnimInterval) clearInterval(tabAnimInterval);
+  const originalTitle = document.title;
+  const frames = ['💰', '✨', '🔥', '✅'];
+  let frameIndex = 0;
+  
+  tabAnimInterval = setInterval(() => {
+    document.title = `${frames[frameIndex]} Bilab: ${amountStr}`;
+    frameIndex = (frameIndex + 1) % frames.length;
+  }, 1500);
+
+  // Останавливаем анимацию, когда пользователь возвращается на вкладку
+  const stopHandler = () => {
+    document.title = originalTitle;
+    clearInterval(tabAnimInterval);
+    tabAnimInterval = null;
+    document.removeEventListener('visibilitychange', stopHandler);
+  };
+  document.addEventListener('visibilitychange', stopHandler);
+}
+
+/* ═══════════ HISTORY ═══════════ */
+function addHistory(e){
+  history.unshift({
+    ts: Date.now(), total: e.total, count: e.items.length,
+    items: e.items.map(i => ({ id:i.id, price:i.price, qty:i.qty })),
+    enabled: Object.fromEntries(DEVICES.map(d => [d.id, state[d.id].enabled]))
+  });
+  if (history.length > 8) history.length = 8;
+  saveHistory(); renderHistory();
+}
+function renderHistory(){
+  if (!history.length) { historyList.innerHTML = `<div class="history-empty">${t('ui.historyEmpty')}</div>`; return; }
+  historyList.innerHTML = history.map((h, i) => {
+    const time = new Date(h.ts).toLocaleString(I18N[lang].locale, { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+    return `<button class="history-item" data-idx="${i}">
+      <div class="hi-left">
+        <div class="hi-time">${time}</div>
+        <div class="hi-count">${h.count} ${I18N[lang].plural(h.count)}</div>
+      </div>
+      <div class="hi-total">${fmt(h.total)} ₽</div>
+    </button>`;
+  }).join('');
+  historyList.querySelectorAll('.history-item').forEach(el => el.addEventListener('click', () => {
+    playSound('click');
+    const h = history[parseInt(el.dataset.idx)]; if (!h) return;
+    DEVICES.forEach(d => {
+      state[d.id].price = null; state[d.id].qty = 1;
+      state[d.id].enabled = h.enabled ? h.enabled[d.id] !== false : true;
+    });
+    h.items.forEach(it => { if (state[it.id]) { state[it.id].price = it.price; state[it.id].qty = it.qty; } });
+    refreshAllInputs(); syncEnabledClasses(); updateCount(); updateAll(); save();
+    toast(t('toasts.historyRestored'), 'success');
+  }));
+}
+function clearHistory(){
+  if (!history.length) return;
+  if (!confirm(t('confirm.clearHistory'))) return;
+  history = []; saveHistory(); renderHistory();
+  toast(t('toasts.historyCleared'), 'info');
+}
+
+/* ═══════════ SHARE / EXPORT / IMPORT ═══════════ */
+function shareLink(){
+  const payload = { budget, discount, d: {} };
+  DEVICES.forEach(d => {
+    if (state[d.id].price != null || !state[d.id].enabled) {
+      payload.d[d.id] = { p: state[d.id].price, q: state[d.id].qty, e: state[d.id].enabled };
+    }
+  });
+  try {
+    const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+    const url = location.origin + location.pathname + '#s=' + b64;
+    navigator.clipboard.writeText(url)
+      .then(() => toast(t('toasts.linkCopied'), 'success'))
+      .catch(() => prompt(t('prompt.copyLink'), url));
+  } catch(e) { toast(t('toasts.shareFail'), 'error'); }
+}
+function tryLoadFromURL(){
+  if (!location.hash.startsWith('#s=')) return;
+  try {
+    const p = JSON.parse(decodeURIComponent(escape(atob(location.hash.slice(3)))));
+    if (p.d) DEVICES.forEach(d => {
+      if (p.d[d.id]) {
+        state[d.id].price = p.d[d.id].p;
+        state[d.id].qty = p.d[d.id].q || 1;
+        state[d.id].enabled = p.d[d.id].e !== false;
+      }
+    });
+    if (typeof p.budget === 'number') budget = p.budget;
+    if (typeof p.discount === 'number') discount = p.discount;
+    history.replaceState(null, '', location.pathname);
+  } catch(e){}
+}
+function exportJSON(){
+  const { items, total, subtotal, discountAmount } = compute();
+  if (!items.length) { toast(t('toasts.nothingToExport'), 'error'); return; }
+  const data = { generatedAt: new Date().toISOString(), lang, budget, discount, discountAmount, subtotal, total,
+    items: items.map(i => ({ id:i.id, label:i.label, price:i.price, qty:i.qty, subtotal:i.subtotal })),
+    enabled: Object.fromEntries(DEVICES.map(d => [d.id, state[d.id].enabled])) };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = `bilab-${Date.now()}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  toast(t('toasts.exported'), 'success');
+}
+function handleFile(e){
+  const f = e.target.files[0]; if (!f) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const p = JSON.parse(ev.target.result);
+      if (!p.items) throw 0;
+      DEVICES.forEach(d => { state[d.id].price = null; state[d.id].qty = 1; state[d.id].enabled = p.enabled ? p.enabled[d.id] !== false : true; });
+      p.items.forEach(it => { if (state[it.id]) { state[it.id].price = it.price; state[it.id].qty = it.qty || 1; } });
+      if (typeof p.budget === 'number') { budget = p.budget; budgetInput.value = budget ? fmt(budget) : ''; }
+      if (typeof p.discount === 'number') { discount = p.discount; discountInput.value = discount; }
+      refreshAllInputs(); syncEnabledClasses(); updateCount(); updateAll(); save();
+      toast(t('toasts.imported'), 'success');
+    } catch(err) { toast(t('toasts.importFail'), 'error'); }
+  };
+  reader.readAsText(f);
+  e.target.value = '';
+}
+
+/* ══════════ RESET ═══════════ */
+function resetAll(){
+  const { hasValue } = compute();
+  if (hasValue && !confirm(t('confirm.reset'))) return;
+  DEVICES.forEach(d => { state[d.id] = { price:null, qty:1, enabled:true }; });
+  budget = 0; discount = 0; activePreset = null;
+  budgetInput.value = ''; discountInput.value = '0';
+  refreshAllInputs(); syncEnabledClasses(); renderPresets(); updateCount(); updateAll(); save();
+  toast(t('toasts.reset'), 'info');
+}
+
+/* ═══════════ THEME ═══════════ */
+function toggleTheme(){
+  const cur = document.documentElement.getAttribute('data-theme');
+  const next = cur === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  themeToggle.innerHTML = `<i data-lucide="${next === 'dark' ? 'moon' : 'sun'}"></i>`;
+  refreshIcons();
+  try { localStorage.setItem('bilab-theme', next); } catch(e){}
+}
+function loadTheme(){
+  let th = 'dark'; try { th = localStorage.getItem('bilab-theme') || 'dark'; } catch(e){}
+  document.documentElement.setAttribute('data-theme', th);
+  themeToggle.innerHTML = `<i data-lucide="${th === 'dark' ? 'moon' : 'sun'}"></i>`;
+}
+
+/* ═══════════ LANG SWITCH ═══════════ */
+function setLang(nl){
+  lang = nl;
+  try { localStorage.setItem(LANG_KEY, nl); } catch(e){}
+  applyStaticTranslations();
+  renderPresets();
+  renderDevices();
+  renderHistory();
+  const m = modal;
+  if (m.classList.contains('active')) {
+    const { items, subtotal, total, discountAmount } = compute();
+    if (items.length) {
+      buildBreakdown(items, subtotal);
+      buildChart(items, subtotal);
+      if (discount > 0) modalNote.innerHTML = `${t('ui.discount')} ${discount}%: <strong>−${fmt(discountAmount)} ₽</strong>`;
+      else if (budget > 0 && total <= budget) modalNote.innerHTML = `${lang==='ru'?'В рамках бюджета':'Within budget'} · ${lang==='ru'?'остаток':'left'} <strong>${fmt(budget - total)} ₽</strong>`;
+      else modalNote.textContent = `${items.length} ${I18N[lang].plural(items.length)}`;
+      modalTotal.innerHTML = `${fmt(total)} <span class="rub">₽</span>`;
+    }
+  }
+  if (budget > 0) budgetInput.value = fmt(budget);
+  updateCount(); updateAll(); refreshIcons();
+}
+
+/* ══════════ SHORTCUTS для частого доступа к DOM ═══════════ */
+const $ = id => document.getElementById(id);
+const brandBadge = $('brandBadge'), lblBudgetText = $('lblBudgetText'), budgetInput = $('budgetInput'),
+      lblDiscountText = $('lblDiscountText'), lblTotalText = $('lblTotalText'),
+      totalValue = $('totalValue'), totalOriginal = $('totalOriginal'),
+      progressFill = $('progressFill'), progressUsed = $('progressUsed'), progressPct = $('progressPct'),
+      btnCalc = $('btnCalc'), btnCalcText = $('btnCalcText'), btnReset = $('btnReset'),
+      miniShareText = $('miniShareText'), miniExportText = $('miniExportText'), miniImportText = $('miniImportText'),
+      presets = $('presets'), devices = $('devices'), deviceList = $('devices'),
+      devicesCount = $('devicesCount'), btnSelectAll = $('btnSelectAll'), btnSelectNone = $('btnSelectNone'),
+      historyList = $('historyList'), lblHistoryText = $('lblHistoryText'), lblHistoryClearText = $('lblHistoryClearText'),
+      modal = $('modal'), modalTotal = $('modalTotal'), modalNote = $('modalNote'),
+      breakdown = $('breakdown'), chartCenter = $('chartCenter'),
+      modalTitleText = $('modalTitleText'), modalCopyText = $('modalCopyText'), modalDoneText = $('modalDoneText'),
+      langToggle = $('langToggle'), langFlag = $('langFlag'), langCode = $('langCode'),
+      themeToggle = $('themeToggle'), toastWrap = $('toastWrap'), footerNote = $('footerNote'),
+      discountInput = $('discountInput'), fileInput = $('fileInput'),
+      orb1 = $('orb1'), orb2 = $('orb2'), orb3 = $('orb3');
+
+/* ═══════════ INIT ═══════════ */
+loadTheme();
+load();
+loadHistory();
+tryLoadFromURL();
+
+lang = detectLang();
+applyStaticTranslations();
+renderPresets();
+renderDevices();
+renderHistory();
+
+if (budget > 0) budgetInput.value = fmt(budget);
+discountInput.value = discount;
+
+updateCount();
+updateAll();
+refreshIcons();
+
+/* ═══════════ EVENTS ═══════════ */
+btnSelectAll.addEventListener('click', () => {
+  playSound('click');
+  DEVICES.forEach(d => state[d.id].enabled = true);
+  syncEnabledClasses(); updateCount(); updateAll(); save();
+  toast(t('toasts.allOn'), 'success');
+});
+btnSelectNone.addEventListener('click', () => {
+  playSound('click');
+  DEVICES.forEach(d => state[d.id].enabled = false);
+  syncEnabledClasses(); updateCount(); updateAll(); save();
+  toast(t('toasts.allOff'), 'info');
+});
+
+langToggle.addEventListener('click', () => {
+  const next = lang === 'ru' ? 'en' : 'ru';
+  setLang(next);
+  playSound('click');
+  toast(I18N[next].toasts.langChanged, 'info');
+});
+
+btnCalc.addEventListener('click', () => { playSound('click'); triggerCalculate(); });
+btnReset.addEventListener('click', () => { playSound('click'); resetAll(); });
+$('btnShare').addEventListener('click', shareLink);
+$('btnExport').addEventListener('click', exportJSON);
+$('btnImport').addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', handleFile);
+$('historyClear').addEventListener('click', clearHistory);
+themeToggle.addEventListener('click', toggleTheme);
+
+budgetInput.addEventListener('input', e => { const v = parsePrice(e.target.value); budget = isNaN(v) ? 0 : v; updateAll(); save(); });
+budgetInput.addEventListener('blur', () => { if (budget > 0) budgetInput.value = fmt(budget); });
+discountInput.addEventListener('input', e => { let v = parseInt(e.target.value) || 0; v = Math.max(0, Math.min(90, v)); discount = v; updateAll(); save(); });
+discountInput.addEventListener('blur', () => { discountInput.value = discount; });
+
+$('modalClose').addEventListener('click', closeModal);
+$('modalCloseBtn').addEventListener('click', closeModal);
+modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+function closeModal(){ modal.classList.remove('active'); }
+
+$('modalCopy').addEventListener('click', async () => {
+  const { items, total, subtotal, discountAmount } = compute(); if (!items.length) return;
+  const R = I18N[lang].report;
+  const lines = [R.header, ''];
+  items.forEach(i => lines.push(`${i.label}${i.qty > 1 ? ` ×${i.qty}` : ''} — ${fmt(i.subtotal)} ₽`));
+  lines.push('');
+  if (discount > 0) { lines.push(`${R.subtotal}: ${fmt(subtotal)} ₽`); lines.push(`${R.discount} ${discount}%: −${fmt(discountAmount)} ₽`); }
+  lines.push(`${R.total}: ${fmt(total)} ₽`);
+  if (budget > 0) lines.push(`${R.budget}: ${fmt(budget)} ₽`);
+  try { await navigator.clipboard.writeText(lines.join('\n')); toast(t('toasts.copied'), 'success'); }
+  catch(e) { toast(t('toasts.copyFail'), 'error'); }
+});
+
+document.addEventListener('keydown', e => {
+  if (e.target && e.target.matches && e.target.matches('input, textarea')) return;
+  if (e.key === 'Escape') closeModal();
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); triggerCalculate(); }
+});
+</script>
+</body>
+</html>
