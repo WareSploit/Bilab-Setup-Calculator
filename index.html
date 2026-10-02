@@ -12,7 +12,6 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="https://unpkg.com/lucide@latest"></script>
 <style>
-/* === БАЗОВЫЕ ПЕРЕМЕННЫЕ И ТЕМЫ === */
 :root[data-theme="dark"] {
   --bg-1:#08080d;--bg-2:#10101a;
   --orb-1:rgba(139,92,246,.28);--orb-2:rgba(6,182,212,.22);--orb-3:rgba(236,72,153,.14);
@@ -22,6 +21,7 @@
   --accent:#8b5cf6;--accent-2:#06b6d4;--accent-soft:rgba(139,92,246,.14);--accent-glow:rgba(139,92,246,.4);
   --error:#f87171;--error-soft:rgba(248,113,113,.12);
   --success:#34d399;--success-soft:rgba(52,211,153,.12);
+  --warning:#fbbf24;--warning-soft:rgba(251,191,36,.12);
   --input-bg:rgba(255,255,255,.04);--input-bg-focus:rgba(255,255,255,.09);
   --shadow:0 25px 50px -12px rgba(0,0,0,.6);
 }
@@ -34,6 +34,7 @@
   --accent:#7c3aed;--accent-2:#0891b2;--accent-soft:rgba(124,58,237,.09);--accent-glow:rgba(124,58,237,.25);
   --error:#dc2626;--error-soft:rgba(220,38,38,.08);
   --success:#059669;--success-soft:rgba(5,150,105,.09);
+  --warning:#d97706;--warning-soft:rgba(217,119,6,.09);
   --input-bg:rgba(15,15,30,.035);--input-bg-focus:rgba(15,15,30,.07);
   --shadow:0 25px 50px -12px rgba(80,80,120,.18);
 }
@@ -55,7 +56,6 @@ body{
 @keyframes float3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-40px,50px) scale(.9)}}
 .app{position:relative;z-index:1;max-width:1140px;margin:0 auto;padding:28px 24px 60px}
 
-/* TOPBAR */
 .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;animation:fadeDown .5s both}
 .brand{display:flex;align-items:center;gap:12px;font-weight:800;font-size:1.25rem;letter-spacing:-.02em}
 .brand-mark{
@@ -79,27 +79,101 @@ body{
 .lang-btn .fi{font-size:1.05em;border-radius:3px;box-shadow:0 0 0 1px rgba(255,255,255,.08)}
 @media (max-width:420px){.lang-btn .lang-code{display:none}}
 
-/* LAYOUT */
 .layout{display:grid;grid-template-columns:1fr 340px;gap:24px;align-items:start}
 @media (max-width:900px){.layout{grid-template-columns:1fr}}
 
-/* PRESETS */
-.presets{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;animation:fadeUp .5s both;animation-delay:.05s}
-.preset{
-  position:relative;display:flex;align-items:center;gap:10px;padding:14px;
-  background:var(--card);border:1px solid var(--border);border-radius:14px;cursor:pointer;
-  transition:all .2s;backdrop-filter:blur(12px);font-family:inherit;color:var(--text);overflow:hidden;
-}
-.preset:hover{background:var(--card-hover);border-color:var(--border-strong);transform:translateY(-2px)}
-.preset.active{border-color:var(--accent);background:var(--accent-soft);box-shadow:0 8px 24px -8px var(--accent-glow)}
-.preset-icon{width:32px;height:32px;border-radius:10px;flex-shrink:0;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center}
-.preset-icon svg{width:16px;height:16px}
-.preset-text{display:flex;flex-direction:column;gap:2px;min-width:0}
-.preset-name{font-size:.85rem;font-weight:600}
-.preset-sub{font-size:.68rem;color:var(--text-dimmer);font-weight:500}
-@media (max-width:480px){.preset-sub{display:none}.preset{padding:12px 10px}.preset-name{font-size:.78rem}}
+/* ═══ ГОТОВЫЕ СБОРКИ ═══ */
+.builds-section{margin-bottom:22px;animation:fadeUp .5s both;animation-delay:.05s}
+.builds-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.builds-title{font-size:1.05rem;font-weight:800;display:flex;align-items:center;gap:8px;letter-spacing:-.02em}
+.builds-title svg{width:18px;height:18px;color:var(--accent)}
+.builds-sub{font-size:.75rem;color:var(--text-dimmer);font-weight:500;margin-top:4px}
 
-/* DEVICES HEADER */
+.builds-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media (max-width:820px){.builds-grid{grid-template-columns:1fr}}
+
+.build-card{
+  position:relative;background:var(--card);border:1px solid var(--border);border-radius:20px;
+  overflow:hidden;cursor:pointer;
+  transition:all .28s cubic-bezier(.34,1.4,.64,1);
+  display:flex;flex-direction:column;
+}
+.build-card:hover{transform:translateY(-6px);border-color:var(--border-strong);box-shadow:0 20px 40px -16px var(--accent-glow)}
+.build-card:hover .build-img img{transform:scale(1.08)}
+.build-card.popular{border-color:rgba(139,92,246,.35)}
+
+.build-img{
+  position:relative;aspect-ratio:16/10;width:100%;
+  background:linear-gradient(135deg,#1a1a25,#0f0f18);overflow:hidden;
+}
+.build-img img{
+  width:100%;height:100%;object-fit:cover;display:block;
+  transition:transform .6s cubic-bezier(.34,1.4,.64,1);
+  filter:brightness(.9) saturate(1.1);
+}
+.build-img::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.72) 100%);
+}
+.build-badge{
+  position:absolute;top:12px;left:12px;z-index:2;
+  font-size:.6rem;font-weight:800;padding:4px 9px;border-radius:7px;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  color:#fff;letter-spacing:.06em;text-transform:uppercase;
+  box-shadow:0 4px 12px rgba(0,0,0,.35);
+}
+.build-badge.hot{background:linear-gradient(135deg,#f59e0b,#ef4444)}
+.build-badge.pro{background:linear-gradient(135deg,#ec4899,#8b5cf6)}
+
+.build-title-overlay{
+  position:absolute;bottom:10px;left:14px;right:14px;z-index:2;
+  display:flex;align-items:flex-end;justify-content:space-between;gap:8px;
+}
+.build-title{font-size:1rem;font-weight:800;color:#fff;letter-spacing:-.02em;text-shadow:0 2px 8px rgba(0,0,0,.6)}
+.build-price{
+  font-size:1.05rem;font-weight:800;color:#fff;
+  font-variant-numeric:tabular-nums;
+  background:linear-gradient(135deg,#fff,#a5b4fc);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:0 2px 8px rgba(0,0,0,.4);
+  white-space:nowrap;
+}
+
+.build-body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:10px;flex:1}
+.build-desc{font-size:.72rem;color:var(--text-dimmer);font-weight:500;line-height:1.4}
+
+.build-parts{display:flex;flex-direction:column;gap:5px;font-size:.72rem}
+.build-part{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.build-part-key{
+  color:var(--text-dimmer);font-weight:600;flex-shrink:0;
+  display:flex;align-items:center;gap:5px;
+}
+.build-part-key svg{width:11px;height:11px;opacity:.7}
+.build-part-val{
+  color:var(--text-dim);font-weight:500;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:right;
+}
+
+.build-total{
+  display:flex;justify-content:space-between;align-items:center;
+  padding-top:10px;margin-top:auto;border-top:1px dashed var(--border);
+  font-size:.8rem;font-weight:700;color:var(--text-dim);
+}
+.build-total strong{color:var(--accent);font-size:1.1rem;font-variant-numeric:tabular-nums}
+
+.build-apply{
+  padding:11px;border-radius:12px;border:none;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  color:#fff;font-family:inherit;font-weight:700;font-size:.82rem;
+  cursor:pointer;transition:all .2s cubic-bezier(.34,1.4,.64,1);
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  box-shadow:0 6px 16px -6px var(--accent-glow);
+}
+.build-apply:hover{transform:translateY(-2px);filter:brightness(1.1);box-shadow:0 10px 22px -8px var(--accent-glow)}
+.build-apply:active{transform:translateY(0)}
+.build-apply svg{width:14px;height:14px}
+
+/* ═══ DEVICES HEADER ═══ */
 .devices-header{
   display:flex;align-items:center;justify-content:space-between;
   margin-bottom:10px;animation:fadeUp .5s both;animation-delay:.08s;
@@ -115,21 +189,18 @@ body{
 }
 .dev-action:hover{color:var(--accent);background:var(--accent-soft);border-color:rgba(139,92,246,.2)}
 
-/* DEVICES */
 .devices{display:flex;flex-direction:column;gap:8px;animation:fadeUp .5s both;animation-delay:.1s}
 .device{
-  display:grid;grid-template-columns:22px 44px 1fr auto auto;
-  gap:12px;align-items:center;
-  padding:12px 14px;background:var(--card);border:1px solid var(--border);border-radius:16px;
+  background:var(--card);border:1px solid var(--border);border-radius:16px;
   backdrop-filter:blur(12px);transition:all .22s cubic-bezier(.34,1.4,.64,1);
   position:relative;overflow:hidden;
 }
 .device::before{
-  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  content:'';position:absolute;left:0;top:12px;bottom:12px;width:3px;
   background:linear-gradient(180deg,var(--accent),var(--accent-2));
-  opacity:0;transition:opacity .2s;
+  opacity:0;transition:opacity .2s;border-radius:2px;
 }
-.device:focus-within{border-color:var(--accent);background:var(--card-hover);transform:translateY(-2px);box-shadow:0 12px 28px -12px var(--accent-glow)}
+.device:focus-within{background:var(--card-hover);box-shadow:0 12px 28px -12px var(--accent-glow)}
 .device:focus-within::before{opacity:1}
 .device.error{border-color:var(--error);background:var(--error-soft);animation:shake .4s}
 .device.error::before{background:var(--error);opacity:1}
@@ -140,9 +211,14 @@ body{
 .device.disabled .qty-box,
 .device.disabled .price-wrap{pointer-events:none;opacity:.6}
 .device.disabled .dev-name{text-decoration:line-through;text-decoration-thickness:1.5px;text-decoration-color:var(--text-dimmer)}
+.device.disabled .suggest-badge{display:none!important}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
 
-/* Checkbox */
+.device-main{
+  display:grid;grid-template-columns:22px 44px 1fr auto auto;
+  gap:12px;align-items:center;padding:12px 14px;
+}
+
 .dev-check{position:relative;width:22px;height:22px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .dev-check input{position:absolute;inset:0;opacity:0;cursor:pointer;margin:0;z-index:1}
 .dev-check-box{
@@ -197,9 +273,98 @@ body{
 .device:focus-within .currency{color:var(--accent)}
 .device.error .currency{color:var(--error)}
 
+.suggest-badge{
+  position:absolute;top:-7px;right:-7px;
+  width:24px;height:24px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  border:2px solid var(--card-solid);
+  display:none;align-items:center;justify-content:center;
+  color:#fff;cursor:pointer;padding:0;
+  box-shadow:0 4px 14px var(--accent-glow);
+  z-index:3;
+  transition:transform .2s cubic-bezier(.34,1.4,.64,1);
+  animation:suggestPop .4s cubic-bezier(.34,1.4,.64,1);
+}
+@keyframes suggestPop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+.suggest-badge:hover{transform:scale(1.18)}
+.suggest-badge:active{transform:scale(.9)}
+.suggest-badge svg{width:12px;height:12px;stroke-width:2.5}
+.device.has-price .suggest-badge{display:flex}
+.device.suggest-open .suggest-badge{
+  background:linear-gradient(135deg,#f59e0b,#ef4444);
+  box-shadow:0 4px 14px rgba(245,158,11,.55);
+}
+.device.suggest-open .suggest-badge svg{transform:rotate(180deg)}
+
+.suggest-panel{
+  max-height:0;overflow:hidden;
+  transition:max-height .4s cubic-bezier(.4,0,.2,1);
+  border-top:0 solid var(--border);
+}
+.device.suggest-open .suggest-panel{
+  max-height:500px;border-top-width:1px;
+}
+.suggest-inner{padding:14px 16px 16px}
+.suggest-title{
+  font-size:.7rem;font-weight:700;color:var(--text-dimmer);
+  text-transform:uppercase;letter-spacing:.08em;
+  display:flex;align-items:center;gap:6px;margin-bottom:10px;
+}
+.suggest-title svg{width:12px;height:12px;color:var(--warning)}
+.suggest-title strong{color:var(--text-dim);font-weight:700;text-transform:none;letter-spacing:0}
+.suggest-hint{
+  font-size:.68rem;color:var(--text-dimmer);font-weight:500;margin-bottom:10px;
+  display:flex;align-items:center;gap:5px;
+}
+.suggest-hint svg{width:11px;height:11px;color:var(--accent)}
+.suggest-list{display:flex;flex-direction:column;gap:6px}
+
+.suggest-item{
+  display:flex;align-items:center;gap:10px;
+  padding:11px 12px;background:var(--input-bg);border-radius:10px;
+  font-size:.8rem;font-weight:500;color:var(--text-dim);
+  cursor:pointer;border:1px solid transparent;
+  transition:all .18s cubic-bezier(.34,1.4,.64,1);
+  animation:suggestItemIn .35s cubic-bezier(.34,1.4,.64,1) both;
+  position:relative;overflow:hidden;
+}
+.suggest-item::before{
+  content:'';width:6px;height:6px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  flex-shrink:0;
+  box-shadow:0 0 8px var(--accent-glow);
+  transition:transform .2s;
+}
+.suggest-item:hover{
+  background:var(--accent-soft);
+  color:var(--text);
+  border-color:rgba(139,92,246,.35);
+  transform:translateX(2px);
+}
+.suggest-item:hover::before{transform:scale(1.5)}
+.suggest-item:active{transform:translateX(2px) scale(.99)}
+@keyframes suggestItemIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+
+.sug-info{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.sug-name{font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sug-tag{font-size:.65rem;color:var(--text-dimmer);font-weight:500}
+.sug-price{
+  font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums;
+  white-space:nowrap;font-size:.85rem;flex-shrink:0;
+  display:flex;align-items:center;gap:4px;
+}
+.sug-price svg{width:12px;height:12px;opacity:0;transition:opacity .2s}
+.suggest-item:hover .sug-price svg{opacity:1}
+
+.suggest-item.is-current{
+  background:var(--success-soft);
+  border-color:rgba(52,211,153,.4);
+}
+.suggest-item.is-current::before{background:var(--success);box-shadow:0 0 8px var(--success)}
+.suggest-item.is-current .sug-price{color:var(--success)}
+
 @media (max-width:640px){
-  .device{grid-template-columns:22px 40px 1fr auto;gap:10px}
-  .dev-check{align-self:center}
+  .device-main{grid-template-columns:22px 40px 1fr auto;gap:10px}
   .dev-icon{width:40px;height:40px}
   .dev-icon svg{width:18px;height:18px}
   .dev-info{grid-column:3/5}
@@ -208,7 +373,6 @@ body{
 }
 @media (max-width:380px){.qty-box{display:none}}
 
-/* SIDEBAR */
 .sidebar{position:sticky;top:28px;display:flex;flex-direction:column;gap:16px;animation:fadeUp .5s both;animation-delay:.15s}
 @media (max-width:900px){.sidebar{position:static}}
 .card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:20px;backdrop-filter:blur(16px)}
@@ -263,7 +427,6 @@ body{
 .mini-btn svg{width:15px;height:15px}
 .mini-btn:hover{color:var(--accent);background:var(--accent-soft);border-color:rgba(139,92,246,.2);transform:translateY(-2px)}
 
-/* HISTORY */
 .history-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .history-head h3{font-size:.72rem;font-weight:700;color:var(--text-dimmer);text-transform:uppercase;letter-spacing:.09em;display:flex;align-items:center;gap:6px}
 .history-head h3 svg{width:12px;height:12px}
@@ -283,7 +446,6 @@ body{
 .hi-count{font-size:.72rem;color:var(--text-dim);font-weight:600}
 .hi-total{font-size:.88rem;font-weight:800;color:var(--accent);white-space:nowrap;font-variant-numeric:tabular-nums}
 
-/* MODAL & CHART */
 .modal{
   position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.7);backdrop-filter:blur(14px);
   display:flex;align-items:center;justify-content:center;padding:20px;
@@ -317,31 +479,68 @@ body{
 
 .chart-container{display:flex;justify-content:center;margin-bottom:20px;position:relative;width:120px;height:120px;margin-left:auto;margin-right:auto}
 .chart-svg{transform:rotate(-90deg);width:100%;height:100%}
-.chart-segment{fill:none;stroke-width:8;stroke-linecap:round;transition: stroke-dasharray 0.6s cubic-bezier(0.34, 1.4, 0.64, 1);}
+.chart-segment{
+  fill:none;stroke-width:8;stroke-linecap:round;
+  animation-name:chartSeg;
+  animation-timing-function:cubic-bezier(.34,1.4,.64,1);
+  animation-fill-mode:both;
+}
+@keyframes chartSeg{from{stroke-dasharray:0 100}}
 .chart-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:.7rem;color:var(--text-dimmer);font-weight:600;text-align:center}
 
-.breakdown{max-height:200px;overflow-y:auto;padding-right:6px;margin-bottom:22px}
+.breakdown{max-height:260px;overflow-y:auto;padding-right:6px;margin-bottom:22px}
 .breakdown::-webkit-scrollbar{width:4px}
 .breakdown::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:2px}
+
 .bd-row{
-  display:grid;grid-template-columns:26px 1fr auto;gap:10px;align-items:center;
+  display:grid;grid-template-columns:56px 1fr auto;gap:12px;align-items:center;
   padding:10px 0;border-bottom:1px solid var(--border);font-size:.85rem;
-  animation:bdRowIn .45s cubic-bezier(.34,1.4,.64,1) both;
+  animation:bdRowIn .6s cubic-bezier(.34,1.4,.64,1) both;
 }
 .bd-row:last-child{border-bottom:none}
-@keyframes bdRowIn{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:translateX(0)}}
-.bd-icon{width:26px;height:26px;border-radius:8px;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center}
-.bd-icon svg{width:13px;height:13px}
+@keyframes bdRowIn{
+  0%{opacity:0;transform:translateX(-32px) scale(.92);filter:blur(5px)}
+  55%{opacity:1;transform:translateX(5px) scale(1.015);filter:blur(0)}
+  100%{opacity:1;transform:translateX(0) scale(1)}
+}
+.bd-thumb{
+  width:56px;height:56px;border-radius:12px;
+  background:var(--input-bg);
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;flex-shrink:0;
+  animation:bdThumbIn .7s cubic-bezier(.34,1.4,.64,1) both;
+  border:1px solid var(--border);
+}
+@keyframes bdThumbIn{
+  0%{transform:scale(0) rotate(-30deg);opacity:0}
+  60%{transform:scale(1.1) rotate(4deg);opacity:1}
+  100%{transform:scale(1) rotate(0);opacity:1}
+}
+.bd-thumb img{
+  width:100%;height:100%;object-fit:cover;display:block;
+}
 .bd-main{display:flex;flex-direction:column;gap:3px;min-width:0}
 .bd-name{font-weight:600;color:var(--text);font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bd-bar{height:3px;background:var(--input-bg);border-radius:2px;overflow:hidden}
-.bd-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:2px;width:0;animation:barGrow .75s cubic-bezier(.34,1.4,.64,1) both}
-@keyframes barGrow{from{width:0}to{width:var(--pct)}}
-.bd-val{font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;font-size:.85rem;white-space:nowrap}
+.bd-bar-fill{
+  height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));
+  border-radius:2px;width:0;
+  animation:barGrow 1s cubic-bezier(.34,1.4,.64,1) both;
+}
+@keyframes barGrow{
+  0%{width:0}
+  70%{width:calc(var(--pct) * 1.06)}
+  100%{width:var(--pct)}
+}
+.bd-val{
+  font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;font-size:.85rem;white-space:nowrap;
+  animation:bdValIn .5s cubic-bezier(.34,1.4,.64,1) both;
+}
+@keyframes bdValIn{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
+
 .modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .modal-actions .btn{padding:13px;font-size:.83rem}
 
-/* TOAST & CONFETTI */
 .toast-wrap{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:300;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
 .toast{
   background:var(--card-solid);border:1px solid var(--border-strong);color:var(--text);
@@ -391,7 +590,17 @@ body{
 
   <div class="layout">
     <main>
-      <div class="presets" id="presets"></div>
+      <!-- ═══ ГОТОВЫЕ СБОРКИ ═══ -->
+      <section class="builds-section">
+        <div class="builds-head">
+          <div>
+            <div class="builds-title"><i data-lucide="package-check"></i> <span id="buildsTitle"></span></div>
+            <div class="builds-sub" id="buildsSub"></div>
+          </div>
+        </div>
+        <div class="builds-grid" id="buildsGrid"></div>
+      </section>
+
       <div class="devices-header">
         <div class="devices-count" id="devicesCount"></div>
         <div class="devices-actions">
@@ -494,8 +703,13 @@ const I18N = {
     flagCode:'ru', code:'RU', locale:'ru-RU', htmlLang:'ru',
     title:'Bilab — Умный калькулятор девайсов', brandBadge:'умный',
     devices:{pc:'Системный блок',monitor:'Монитор',mouse:'Мышь',keyboard:'Клавиатура',mousepad:'Коврик',headphones:'Наушники',microphone:'Микрофон'},
-    presets:{
-      budget:{name:'Бюджет',sub:'~66k ₽'}, mid:{name:'Средний',sub:'~188k ₽'}, pro:{name:'Про',sub:'~566k ₽'}
+    builds:{
+      title:'Готовые сборки',
+      sub:'Выберите сборку — цены и комплектующие подставятся автоматически',
+      apply:'Применить',
+      popular:'Хит', hot:'Хит продаж', best:'Лучший выбор', bestValue:'Оптимально', top:'Топ',
+      total:'Итого',
+      parts:{cpu:'Процессор',gpu:'Видеокарта',ram:'ОЗУ',ssd:'SSD',mb:'Материнка',psu:'Блок питания',case:'Корпус',cooler:'Охлаждение'}
     },
     ui:{
       budgetLabel:'Лимит бюджета', budgetPlaceholder:'Не задан',
@@ -506,7 +720,10 @@ const I18N = {
       modalTitle:'Детализация расчёта', modalCopy:'Копировать', modalDone:'Готово',
       chartPositions:'позиций',
       selectAll:'Все', selectNone:'Ничего',
-      selectedOf:(a,b)=>`Выбрано <strong>${a}</strong> из ${b}`
+      selectedOf:(a,b)=>`Выбрано <strong>${a}</strong> из ${b}`,
+      suggestTitle:(p)=>`Что можно взять за <strong>~${p} ₽</strong>:`,
+      suggestTooltip:'Показать примеры',
+      suggestHint:'Нажмите на вариант — цена подставится автоматически'
     },
     hints:{
       range:(a,b)=>`${a} — ${b} ₽`,
@@ -516,7 +733,8 @@ const I18N = {
       off:'Выключено — нажмите на кружок слева'
     },
     toasts:{
-      presetApplied:n=>`Пресет «${n}» применён`,
+      buildApplied:n=>`Сборка «${n}» применена`,
+      suggestionPicked:(n,p)=>`${n} · ${p} ₽`,
       checkFields:'Проверьте подсвеченные поля',
       reset:'Сброшено', historyCleared:'История очищена',
       linkCopied:'Ссылка скопирована', copyFail:'Не удалось скопировать',
@@ -529,14 +747,20 @@ const I18N = {
     confirm:{reset:'Сбросить все введённые данные?', clearHistory:'Очистить историю?'},
     prompt:{copyLink:'Скопируйте ссылку:'},
     plural:n=>{const a=n%10,b=n%100;if(a===1&&b!==11)return'позиция';if(a>=2&&a<=4&&(b<10||b>=20))return'позиции';return'позиций'},
-    report:{header:'Bilab — расчёт', subtotal:'Подытог', discount:'Скидка', total:'Итого', budget:'Бюджет'}
+    report:{header:'Bilab — расчёт', subtotal:'Подытог', discount:'Скидка', total:'Итого', budget:'Бюджет'},
+    pickHint:'Кликните — подставим цену'
   },
   en: {
     flagCode:'gb', code:'EN', locale:'en-US', htmlLang:'en',
     title:'Bilab — Smart Device Calculator', brandBadge:'smart',
     devices:{pc:'System Unit',monitor:'Monitor',mouse:'Mouse',keyboard:'Keyboard',mousepad:'Mousepad',headphones:'Headphones',microphone:'Microphone'},
-    presets:{
-      budget:{name:'Budget',sub:'~66k ₽'}, mid:{name:'Mid-range',sub:'~188k ₽'}, pro:{name:'Pro',sub:'~566k ₽'}
+    builds:{
+      title:'Ready-made builds',
+      sub:'Pick a build — prices and parts will be filled automatically',
+      apply:'Apply',
+      popular:'Hit', hot:'Best seller', best:'Best choice', bestValue:'Best value', top:'Top',
+      total:'Total',
+      parts:{cpu:'CPU',gpu:'GPU',ram:'RAM',ssd:'SSD',mb:'Motherboard',psu:'PSU',case:'Case',cooler:'Cooler'}
     },
     ui:{
       budgetLabel:'Budget Limit', budgetPlaceholder:'Not set',
@@ -547,7 +771,10 @@ const I18N = {
       modalTitle:'Calculation Details', modalCopy:'Copy', modalDone:'Done',
       chartPositions:'items',
       selectAll:'All', selectNone:'None',
-      selectedOf:(a,b)=>`<strong>${a}</strong> of ${b} selected`
+      selectedOf:(a,b)=>`<strong>${a}</strong> of ${b} selected`,
+      suggestTitle:(p)=>`Options at <strong>~${p} ₽</strong>:`,
+      suggestTooltip:'Show examples',
+      suggestHint:'Click an option — price will fill in automatically'
     },
     hints:{
       range:(a,b)=>`${a} — ${b} ₽`,
@@ -557,7 +784,8 @@ const I18N = {
       off:'Disabled — click the circle on the left'
     },
     toasts:{
-      presetApplied:n=>`Preset "${n}" applied`,
+      buildApplied:n=>`Build "${n}" applied`,
+      suggestionPicked:(n,p)=>`${n} · ${p} ₽`,
       checkFields:'Check highlighted fields',
       reset:'Reset', historyCleared:'History cleared',
       linkCopied:'Link copied', copyFail:'Copy failed',
@@ -570,7 +798,8 @@ const I18N = {
     confirm:{reset:'Reset all entered data?', clearHistory:'Clear history?'},
     prompt:{copyLink:'Copy the link:'},
     plural:n=>n===1?'item':'items',
-    report:{header:'Bilab — Estimate', subtotal:'Subtotal', discount:'Discount', total:'Total', budget:'Budget'}
+    report:{header:'Bilab — Estimate', subtotal:'Subtotal', discount:'Discount', total:'Total', budget:'Budget'},
+    pickHint:'Click to apply price'
   }
 };
 const LANG_KEY = 'bilab-lang';
@@ -590,19 +819,325 @@ const DEVICES = [
   {id:'headphones',icon:'headphones',min:500,max:80000},
   {id:'microphone',icon:'mic',min:800,max:60000},
 ];
-const PRESETS = {
-  budget:{icon:'piggy-bank',prices:{pc:45000,monitor:12000,mouse:1500,keyboard:2500,mousepad:500,headphones:3000,microphone:2500}},
-  mid:{icon:'zap',prices:{pc:120000,monitor:35000,mouse:5000,keyboard:7000,mousepad:1500,headphones:12000,microphone:8000}},
-  pro:{icon:'gem',prices:{pc:350000,monitor:120000,mouse:12000,keyboard:18000,mousepad:4000,headphones:35000,microphone:25000}}
+
+/* 🎮 ГОТОВЫЕ СБОРКИ — детальные, с реальными комплектующими и картинками */
+const BUILDS = [
+  {
+    key:'starter',
+    name:'Starter Gaming',
+    nameEn:'Starter Gaming',
+    tag:'Хит',
+    tagEn:'Hit',
+    tagClass:'hot',
+    desc:'Первый игровой ПК — тянет все популярные игры в 1080p',
+    descEn:'Your first gaming PC — runs all popular 1080p titles',
+    img:'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=600&auto=format&fit=crop&q=80',
+    total:66000,
+    parts:{
+      cpu:'Ryzen 5 5600',
+      gpu:'RTX 3050 8GB',
+      ram:'16GB DDR4 3200',
+      ssd:'512GB NVMe',
+      mb:'B450M',
+      psu:'550W 80+ Bronze',
+      case:'Mid-Tower ATX',
+      cooler:'Box'
+    },
+    devices:{
+      pc:         { price: 42000, img:'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=300&auto=format&fit=crop&q=80', name:'Ryzen 5 5600 + RTX 3050' },
+      monitor:    { price: 10500, img:'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=300&auto=format&fit=crop&q=80', name:'AOC 24B2XH · 24" 75Hz' },
+      mouse:      { price: 2200,  img:'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=300&auto=format&fit=crop&q=80', name:'Logitech G102 Lightsync' },
+      keyboard:   { price: 3000,  img:'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=300&auto=format&fit=crop&q=80', name:'Redragon K552 Kumara' },
+      mousepad:   { price: 900,   img:'https://images.unsplash.com/photo-1615641972471-b67c63db27c1?w=300&auto=format&fit=crop&q=80', name:'SteelSeries QcK' },
+      headphones: { price: 4900,  img:'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&auto=format&fit=crop&q=80', name:'HyperX Cloud Stinger' },
+      microphone: { price: 2500,  img:'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=300&auto=format&fit=crop&q=80', name:'Fifine K669' }
+    }
+  },
+  {
+    key:'mid',
+    name:'Mid-range Pro',
+    nameEn:'Mid-range Pro',
+    tag:'Оптимально',
+    tagEn:'Best value',
+    tagClass:'',
+    desc:'Комфортные 1440p на высоких + всё для стрима',
+    descEn:'Comfortable 1440p high + everything for streaming',
+    img:'https://images.unsplash.com/photo-1593305841991-05c297ba4575?w=600&auto=format&fit=crop&q=80',
+    total:188000,
+    parts:{
+      cpu:'Ryzen 5 7600',
+      gpu:'RTX 4060 Ti 8GB',
+      ram:'32GB DDR5 6000',
+      ssd:'1TB NVMe Gen4',
+      mb:'B650',
+      psu:'650W 80+ Gold',
+      case:'Mid-Tower Airflow',
+      cooler:'Башня 4 трубки'
+    },
+    devices:{
+      pc:         { price: 128000, img:'https://images.unsplash.com/photo-1593305841991-05c297ba4575?w=300&auto=format&fit=crop&q=80', name:'Ryzen 5 7600 + RTX 4060 Ti' },
+      monitor:    { price: 32000,  img:'https://images.unsplash.com/photo-1547082299-de196ea013d6?w=300&auto=format&fit=crop&q=80', name:'Gigabyte M27Q · 27" 1440p 170Hz' },
+      mouse:      { price: 12000,  img:'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=300&auto=format&fit=crop&q=80', name:'Logitech G Pro X Superlight' },
+      keyboard:   { price: 8000,   img:'https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?w=300&auto=format&fit=crop&q=80', name:'Keychron K2 V2' },
+      mousepad:   { price: 2000,   img:'https://images.unsplash.com/photo-1615641972471-b67c63db27c1?w=300&auto=format&fit=crop&q=80', name:'HyperX Fury S Pro XL' },
+      headphones: { price: 10000,  img:'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=300&auto=format&fit=crop&q=80', name:'HyperX Cloud II' },
+      microphone: { price: 16000,  img:'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=300&auto=format&fit=crop&q=80', name:'HyperX QuadCast S' }
+    }
+  },
+  {
+    key:'pro',
+    name:'Pro Streaming',
+    nameEn:'Pro Streaming',
+    tag:'Топ',
+    tagEn:'Top',
+    tagClass:'pro',
+    desc:'4K-гейминг, максимальный FPS и студийный звук',
+    descEn:'4K gaming, max FPS and studio-grade audio',
+    img:'https://images.unsplash.com/photo-1598550476439-6847785fcea6?w=600&auto=format&fit=crop&q=80',
+    total:566000,
+    parts:{
+      cpu:'Ryzen 7 7800X3D',
+      gpu:'RTX 4080 Super 16GB',
+      ram:'32GB DDR5 6400',
+      ssd:'2TB NVMe Gen4',
+      mb:'X670E',
+      psu:'850W 80+ Gold',
+      case:'Full-Tower E-ATX',
+      cooler:'AIO 360mm'
+    },
+    devices:{
+      pc:         { price: 385000, img:'https://images.unsplash.com/photo-1598550476439-6847785fcea6?w=300&auto=format&fit=crop&q=80', name:'Ryzen 7 7800X3D + RTX 4080 Super' },
+      monitor:    { price: 108000, img:'https://images.unsplash.com/photo-1585792180666-f7347c490ee2?w=300&auto=format&fit=crop&q=80', name:'Samsung Odyssey G7 · 32" 4K 144Hz' },
+      mouse:      { price: 14000,  img:'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=300&auto=format&fit=crop&q=80', name:'Razer Viper V2 Pro' },
+      keyboard:   { price: 22000,  img:'https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?w=300&auto=format&fit=crop&q=80', name:'Keychron Q1 Pro' },
+      mousepad:   { price: 6500,   img:'https://images.unsplash.com/photo-1615641972471-b67c63db27c1?w=300&auto=format&fit=crop&q=80', name:'Artisan Zero XL' },
+      headphones: { price: 18000,  img:'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=300&auto=format&fit=crop&q=80', name:'Beyerdynamic DT 770 Pro' },
+      microphone: { price: 22500,  img:'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=300&auto=format&fit=crop&q=80', name:'Shure MV7' }
+    }
+  }
+];
+
+/* 💡 Рекомендации с ценами и картинками */
+const SUGGESTIONS = {
+  pc: [
+    { max: 60000, items: [
+      ['Ryzen 5 5600 + RTX 3050', 52000, '1080p · entry', 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=400&auto=format&fit=crop&q=80'],
+      ['i3-12100F + RX 6600', 48000, '1080p · budget', 'https://images.unsplash.com/photo-1593305841991-05c297ba4575?w=400&auto=format&fit=crop&q=80'],
+      ['Ryzen 5 5500 + GTX 1660 Super', 44000, '1080p · starter', 'https://images.unsplash.com/photo-1541029071515-84cc54f84dc5?w=400&auto=format&fit=crop&q=80']
+    ]},
+    { max: 100000, items: [
+      ['Ryzen 5 7600 + RTX 4060', 85000, '1080p/1440p · AM5', 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=400&auto=format&fit=crop&q=80'],
+      ['i5-12400F + RTX 3060 12GB', 78000, '1440p · 12GB', 'https://images.unsplash.com/photo-1593305841991-05c297ba4575?w=400&auto=format&fit=crop&q=80'],
+      ['Ryzen 5 5600 + RTX 4060 Ti', 92000, '1440p · DLSS3', 'https://images.unsplash.com/photo-1541029071515-84cc54f84dc5?w=400&auto=format&fit=crop&q=80']
+    ]},
+    { max: 180000, items: [
+      ['Ryzen 7 7700 + RTX 4060 Ti', 135000, '1440p · 8 ядер', 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=400&auto=format&fit=crop&q=80'],
+      ['i5-13600KF + RTX 4070', 165000, '1440p · high', 'https://images.unsplash.com/photo-1593305841991-05c297ba4575?w=400&auto=format&fit=crop&q=80'],
+      ['Ryzen 7 5800X3D + RTX 4070', 155000, '1440p · gaming', 'https://images.unsplash.com/photo-1541029071515-84cc54f84dc5?w=400&auto=format&fit=crop&q=80']
+    ]},
+    { max: 300000, items: [
+      ['Ryzen 7 7800X3D + RTX 4070 Super', 230000, '1440p/4K · топ', 'https://images.unsplash.com/photo-1598550476439-6847785fcea6?w=400&auto=format&fit=crop&q=80'],
+      ['i7-14700K + RTX 4070 Ti Super', 275000, '4K · 16GB', 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=400&auto=format&fit=crop&q=80'],
+      ['Ryzen 9 7900X + RTX 4080', 290000, '4K · creator', 'https://images.unsplash.com/photo-1593305841991-05c297ba4575?w=400&auto=format&fit=crop&q=80']
+    ]},
+    { max: 500000, items: [
+      ['Ryzen 9 7950X + RTX 4080 Super', 420000, '4K · 16 ядер', 'https://images.unsplash.com/photo-1598550476439-6847785fcea6?w=400&auto=format&fit=crop&q=80'],
+      ['i9-14900K + RTX 4080 Super', 450000, '4K · флагман', 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=400&auto=format&fit=crop&q=80'],
+      ['Ryzen 7 7800X3D + RTX 4090', 470000, '4K · max FPS', 'https://images.unsplash.com/photo-1593305841991-05c297ba4575?w=400&auto=format&fit=crop&q=80']
+    ]},
+    { max: Infinity, items: [
+      ['Threadripper 7960X + RTX 4090', 850000, 'workstation · 24 ядра', 'https://images.unsplash.com/photo-1598550476439-6847785fcea6?w=400&auto=format&fit=crop&q=80'],
+      ['i9-14900KS + RTX 4090', 600000, 'flagship · 6GHz', 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=400&auto=format&fit=crop&q=80'],
+      ['Threadripper PRO + 2× RTX 4090', 1500000, 'HEDT · dual GPU', 'https://images.unsplash.com/photo-1593305841991-05c297ba4575?w=400&auto=format&fit=crop&q=80']
+    ]}
+  ],
+  monitor: [
+    { max: 15000, items: [
+      ['AOC 24B2XH · 24" 1080p 75Hz IPS', 8500, 'бюджет · IPS', 'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=400&auto=format&fit=crop&q=80'],
+      ['Samsung S24R350 · 24" 1080p 75Hz', 9000, 'офис · 75Hz', 'https://images.unsplash.com/photo-1547082299-de196ea013d6?w=400&auto=format&fit=crop&q=80'],
+      ['Dell P2422H · 24" 1080p IPS', 14500, 'офис · Pivot', 'https://images.unsplash.com/photo-1585792180666-f7347c490ee2?w=400&auto=format&fit=crop&q=80']
+    ]},
+    { max: 30000, items: [
+      ['Samsung Odyssey G3 · 24" 144Hz', 16000, 'gaming · 144Hz', 'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=400&auto=format&fit=crop&q=80'],
+      ['LG 27MP400 · 27" 1080p IPS', 13500, '27" · офис', 'https://images.unsplash.com/photo-1547082299-de196ea013d6?w=400&auto=format&fit=crop&q=80'],
+      ['AOC 24G2SPU · 24" 165Hz IPS', 17500, '165Hz · IPS', 'https://images.unsplash.com/photo-1585792180666-f7347c490ee2?w=400&auto=format&fit=crop&q=80']
+    ]},
+    { max: 60000, items: [
+      ['Dell S2721HGF · 27" 144Hz', 25000, '27" · VA · 144Hz', 'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=400&auto=format&fit=crop&q=80'],
+      ['LG 27GN650 · 27" 144Hz IPS', 27000, '27" · IPS · FreeSync', 'https://images.unsplash.com/photo-1547082299-de196ea013d6?w=400&auto=format&fit=crop&q=80'],
+      ['Gigabyte M27Q · 27" 1440p 170Hz', 38000, '2K · KVM', 'https://images.unsplash.com/photo-1585792180666-f7347c490ee2?w=400&auto=format&fit=crop&q=80']
+    ]},
+    { max: 120000, items: [
+      ['Samsung Odyssey G5 · 32" 1440p 144Hz', 32000, '32" · 2K', 'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=400&auto=format&fit=crop&q=80'],
+      ['LG 27GP850 · 27" 1440p 165Hz', 55000, '2K · Nano IPS', 'https://images.unsplash.com/photo-1547082299-de196ea013d6?w=400&auto=format&fit=crop&q=80'],
+      ['Gigabyte M32U · 32" 4K 144Hz', 85000, '4K · HDMI 2.1', 'https://images.unsplash.com/photo-1585792180666-f7347c490ee2?w=400&auto=format&fit=crop&q=80']
+    ]},
+    { max: 250000, items: [
+      ['Samsung Odyssey G7 · 32" 4K 144Hz', 110000, '4K · 1000R', 'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=400&auto=format&fit=crop&q=80'],
+      ['LG 32GQ950 · 32" 4K Nano IPS', 130000, '4K · HDR1000', 'https://images.unsplash.com/photo-1547082299-de196ea013d6?w=400&auto=format&fit=crop&q=80'],
+      ['ASUS ROG Swift PG279QM · 27" 2K 240Hz', 95000, '2K · 240Hz · G-Sync', 'https://images.unsplash.com/photo-1585792180666-f7347c490ee2?w=400&auto=format&fit=crop&q=80']
+    ]},
+    { max: Infinity, items: [
+      ['Samsung Odyssey Neo G9 · 49" DQHD 240Hz', 220000, '49" · Mini-LED', 'https://images.unsplash.com/photo-1585792180666-f7347c490ee2?w=400&auto=format&fit=crop&q=80'],
+      ['LG 45GR95QE · OLED 240Hz', 250000, 'OLED · 45"', 'https://images.unsplash.com/photo-1547082299-de196ea013d6?w=400&auto=format&fit=crop&q=80'],
+      ['ASUS ROG Swift PG42UQ OLED', 290000, 'OLED · 42" · 138Hz', 'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=400&auto=format&fit=crop&q=80']
+    ]}
+  ],
+  mouse: [
+    { max: 2000, items: [
+      ['Logitech B100', 700, 'офис · 1000 DPI', 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=400&auto=format&fit=crop&q=80'],
+      ['Defender Accura', 500, 'бюджет', 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=400&auto=format&fit=crop&q=80'],
+      ['Oklick 385M', 600, 'офис', 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=400&auto=format&fit=crop&q=80']
+    ]},
+    { max: 5000, items: [
+      ['Logitech G102 Lightsync', 2500, 'gaming · RGB', 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=400&auto=format&fit=crop&q=80'],
+      ['Razer DeathAdder Essential', 2800, 'gaming · classic', 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=400&auto=format&fit=crop&q=80'],
+      ['SteelSeries Rival 3', 3200, 'gaming · 8500 DPI', 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=400&auto=format&fit=crop&q=80']
+    ]},
+    { max: 10000, items: [
+      ['Logitech G304 Wireless', 5500, 'wireless · Hero', 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=400&auto=format&fit=crop&q=80'],
+      ['Razer Viper Mini', 4500, 'лёгкая · 61g', 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=400&auto=format&fit=crop&q=80'],
+      ['HyperX Pulsefire Haste', 5200, 'ультралёгкая · 59g', 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=400&auto=format&fit=crop&q=80']
+    ]},
+    { max: 15000, items: [
+      ['Logitech G Pro X Superlight', 13000, 'pro · 63g', 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=400&auto=format&fit=crop&q=80'],
+      ['Razer Viper V2 Pro', 13500, 'pro · 58g', 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=400&auto=format&fit=crop&q=80'],
+      ['SteelSeries Aerox 3 Wireless', 9500, 'wireless · IP54', 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=400&auto=format&fit=crop&q=80']
+    ]},
+    { max: Infinity, items: [
+      ['Logitech G Pro X Superlight 2', 18000, 'pro · Hero 2', 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=400&auto=format&fit=crop&q=80'],
+      ['Razer DeathAdder V3 Pro', 17500, 'pro · ergo', 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=400&auto=format&fit=crop&q=80'],
+      ['Finalmouse Starlight-12', 45000, 'limited · magnes', 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=400&auto=format&fit=crop&q=80']
+    ]}
+  ],
+  keyboard: [
+    { max: 2000, items: [
+      ['Logitech K120', 900, 'мембрана · офис', 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=400&auto=format&fit=crop&q=80'],
+      ['Oklick 965G', 800, 'бюджет', 'https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?w=400&auto=format&fit=crop&q=80'],
+      ['Genius KB-118', 700, 'офис', 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=400&auto=format&fit=crop&q=80']
+    ]},
+    { max: 5000, items: [
+      ['Logitech K380', 2800, 'BT · мультиустройство', 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=400&auto=format&fit=crop&q=80'],
+      ['Redragon K552 Kumara', 3500, 'механика · TKL', 'https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?w=400&auto=format&fit=crop&q=80'],
+      ['Ardor Gaming Rare M5', 3200, 'механика · RGB', 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=400&auto=format&fit=crop&q=80']
+    ]},
+    { max: 10000, items: [
+      ['HyperX Alloy Origins Core', 7500, 'механика · TKL', 'https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?w=400&auto=format&fit=crop&q=80'],
+      ['Razer BlackWidow V3', 9500, 'механика · Green', 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=400&auto=format&fit=crop&q=80'],
+      ['Ardor Gaming Trinity Pro', 8500, 'механика · hot-swap', 'https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?w=400&auto=format&fit=crop&q=80']
+    ]},
+    { max: 20000, items: [
+      ['Keychron K2 V2', 12500, 'BT · hot-swap · 75%', 'https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?w=400&auto=format&fit=crop&q=80'],
+      ['Royal Kludge RK84', 11000, 'BT · 75% · RGB', 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=400&auto=format&fit=crop&q=80'],
+      ['Logitech G413 Carbon', 7800, 'механика · Romer-G', 'https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?w=400&auto=format&fit=crop&q=80']
+    ]},
+    { max: Infinity, items: [
+      ['Keychron Q1 Pro', 22000, 'premium · QMK', 'https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?w=400&auto=format&fit=crop&q=80'],
+      ['Wooting 60HE', 30000, 'analog · eSports', 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=400&auto=format&fit=crop&q=80'],
+      ['Logitech G915 TKL', 20000, 'wireless · LIGHTSPEED', 'https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?w=400&auto=format&fit=crop&q=80']
+    ]}
+  ],
+  mousepad: [
+    { max: 500, items: [
+      ['A4Tech X7-200MP', 350, 'бюджет', 'https://images.unsplash.com/photo-1615641972471-b67c63db27c1?w=400&auto=format&fit=crop&q=80'],
+      ['Oklick MP-160', 300, 'офис', 'https://images.unsplash.com/photo-1615641972471-b67c63db27c1?w=400&auto=format&fit=crop&q=80'],
+      ['Defender Easy Glide', 250, 'тонкий', 'https://images.unsplash.com/photo-1615641972471-b67c63db27c1?w=400&auto=format&fit=crop&q=80']
+    ]},
+    { max: 1500, items: [
+      ['SteelSeries QcK', 1200, 'классика · cloth', 'https://images.unsplash.com/photo-1615641972471-b67c63db27c1?w=400&auto=format&fit=crop&q=80'],
+      ['Razer Goliathus Mobile', 1100, 'mobile · тонкий', 'https://images.unsplash.com/photo-1615641972471-b67c63db27c1?w=400&auto=format&fit=crop&q=80'],
+      ['HyperX Fury S Pro', 1500, 'gaming · speed', 'https://images.unsplash.com/photo-1615641972471-b67c63db27c1?w=400&auto=format&fit=crop&q=80']
+    ]},
+    { max: 3000, items: [
+      ['HyperX Fury S Pro XL', 2200, 'XL · speed', 'https://images.unsplash.com/photo-1615641972471-b67c63db27c1?w=400&auto=format&fit=crop&q=80'],
+      ['Logitech G240', 1800, 'cloth · balanced', 'https://images.unsplash.com/photo-1615641972471-b67c63db27c1?w=400&auto=format&fit=crop&q=80'],
+      ['Razer Goliathus Extended', 2500, 'extended · RGB', 'https://images.unsplash.com/photo-1615641972471-b67c63db27c1?w=400&auto=format&fit=crop&q=80']
+    ]},
+    { max: 6000, items: [
+      ['Artisan Hien Mid', 4800, 'японский · speed', 'https://images.unsplash.com/photo-1615641972471-b67c63db27c1?w=400&auto=format&fit=crop&q=80'],
+      ['Zowie G-SR-SE', 4500, 'eSports · control', 'https://images.unsplash.com/photo-1615641972471-b67c63db27c1?w=400&auto=format&fit=crop&q=80'],
+      ['Logitech G840 XL', 3800, 'XL · cloth', 'https://images.unsplash.com/photo-1615641972471-b67c63db27c1?w=400&auto=format&fit=crop&q=80']
+    ]},
+    { max: Infinity, items: [
+      ['Artisan Zero XL', 6500, 'premium · control', 'https://images.unsplash.com/photo-1615641972471-b67c63db27c1?w=400&auto=format&fit=crop&q=80'],
+      ['SkyPad 3.0', 8500, 'glass · eSports', 'https://images.unsplash.com/photo-1615641972471-b67c63db27c1?w=400&auto=format&fit=crop&q=80'],
+      ['Pulsar ParaControl XXL', 5500, 'XXL · pro', 'https://images.unsplash.com/photo-1615641972471-b67c63db27c1?w=400&auto=format&fit=crop&q=80']
+    ]}
+  ],
+  headphones: [
+    { max: 3000, items: [
+      ['Superlux HD681', 2200, 'студийные · открытые', 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&auto=format&fit=crop&q=80'],
+      ['Sony MDR-ZX310', 2500, 'складные · офис', 'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=400&auto=format&fit=crop&q=80'],
+      ['Defender Pulse', 1500, 'gaming · бюджет', 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&auto=format&fit=crop&q=80']
+    ]},
+    { max: 8000, items: [
+      ['HyperX Cloud Stinger', 5500, 'gaming · микро', 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&auto=format&fit=crop&q=80'],
+      ['SteelSeries Arctis 1', 6000, 'gaming · мультиплатформа', 'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=400&auto=format&fit=crop&q=80'],
+      ['Corsair HS50 Pro', 5800, 'gaming · металл', 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&auto=format&fit=crop&q=80']
+    ]},
+    { max: 15000, items: [
+      ['HyperX Cloud II', 9500, 'gaming · 7.1 USB', 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&auto=format&fit=crop&q=80'],
+      ['Logitech G Pro X', 12500, 'gaming · Blue VO!CE', 'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=400&auto=format&fit=crop&q=80'],
+      ['SteelSeries Arctis 5', 10500, 'gaming · RGB', 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&auto=format&fit=crop&q=80']
+    ]},
+    { max: 30000, items: [
+      ['Beyerdynamic DT 770 Pro', 17500, 'студийные · закрытые', 'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=400&auto=format&fit=crop&q=80'],
+      ['Sennheiser HD 560S', 19500, 'открытые · аудиофил', 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&auto=format&fit=crop&q=80'],
+      ['Logitech G Pro X 2', 25000, 'gaming · graphene', 'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=400&auto=format&fit=crop&q=80']
+    ]},
+    { max: Infinity, items: [
+      ['Sennheiser HD 660S', 32000, 'аудиофил · открытые', 'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=400&auto=format&fit=crop&q=80'],
+      ['Beyerdynamic DT 1990 Pro', 45000, 'студийные · Tesla', 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&auto=format&fit=crop&q=80'],
+      ['Audeze LCD-1', 55000, 'planar · reference', 'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=400&auto=format&fit=crop&q=80']
+    ]}
+  ],
+  microphone: [
+    { max: 3000, items: [
+      ['Fifine K669', 2200, 'USB · стрим', 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=400&auto=format&fit=crop&q=80'],
+      ['Maono AU-A04', 2500, 'USB · комплект', 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=400&auto=format&fit=crop&q=80'],
+      ['Trust GXT 232', 1800, 'USB · настольный', 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=400&auto=format&fit=crop&q=80']
+    ]},
+    { max: 8000, items: [
+      ['Fifine K678', 4500, 'USB · металл', 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=400&auto=format&fit=crop&q=80'],
+      ['HyperX SoloCast', 6500, 'USB · стрим', 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=400&auto=format&fit=crop&q=80'],
+      ['Razer Seiren Mini', 5500, 'USB · компакт', 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=400&auto=format&fit=crop&q=80']
+    ]},
+    { max: 15000, items: [
+      ['Blue Yeti', 12500, 'USB · легенда', 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=400&auto=format&fit=crop&q=80'],
+      ['HyperX QuadCast S', 14500, 'USB · RGB', 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=400&auto=format&fit=crop&q=80'],
+      ['Rode NT-USB Mini', 10500, 'USB · студийный', 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=400&auto=format&fit=crop&q=80']
+    ]},
+    { max: 30000, items: [
+      ['Shure MV7', 22000, 'USB/XLR · подкаст', 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=400&auto=format&fit=crop&q=80'],
+      ['Rode NT1-A + интерфейс', 25000, 'XLR · студия', 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=400&auto=format&fit=crop&q=80'],
+      ['Audio-Technica AT2020USB+', 18000, 'USB · студийный', 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=400&auto=format&fit=crop&q=80']
+    ]},
+    { max: Infinity, items: [
+      ['Shure SM7B + интерфейс', 45000, 'XLR · broadcast', 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=400&auto=format&fit=crop&q=80'],
+      ['Neumann TLM 102 + интерфейс', 75000, 'XLR · премиум', 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=400&auto=format&fit=crop&q=80'],
+      ['Rode PodMic + Rodecaster', 55000, 'XLR · стрим', 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=400&auto=format&fit=crop&q=80']
+    ]}
+  ]
 };
-const STORAGE_KEY = 'bilab-v5';
-const HISTORY_KEY = 'bilab-history-v5';
+
+const PLACEHOLDER_IMGS = {
+  pc:'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=300&auto=format&fit=crop&q=80',
+  monitor:'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=300&auto=format&fit=crop&q=80',
+  mouse:'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=300&auto=format&fit=crop&q=80',
+  keyboard:'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=300&auto=format&fit=crop&q=80',
+  mousepad:'https://images.unsplash.com/photo-1615641972471-b67c63db27c1?w=300&auto=format&fit=crop&q=80',
+  headphones:'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&auto=format&fit=crop&q=80',
+  microphone:'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=300&auto=format&fit=crop&q=80'
+};
+
+const STORAGE_KEY = 'bilab-v10';
+const HISTORY_KEY = 'bilab-history-v10';
 const COLORS = ['#8b5cf6','#06b6d4','#ec4899','#f59e0b','#10b981','#6366f1','#ef4444'];
 
 /* ═══════════ STATE ═══════════ */
 const state = {};
-DEVICES.forEach(d => state[d.id] = { price:null, qty:1, enabled:true });
-let budget = 0, discount = 0, activePreset = null, history = [];
+DEVICES.forEach(d => state[d.id] = { price:null, qty:1, enabled:true, img:null, name:null });
+let budget = 0, discount = 0, activeBuild = null, history = [];
 
 /* ═══════════ AUDIO ═══════════ */
 let audioCtx = null;
@@ -634,7 +1169,7 @@ function playSound(type){
   } catch(e){}
 }
 
-/* ══════════ CONFETTI ═══════════ */
+/* ═══════════ CONFETTI ═══════════ */
 const canvas = document.getElementById('confetti-canvas');
 const ctx = canvas.getContext('2d');
 let particles = [];
@@ -680,6 +1215,7 @@ const fmt = n => Math.round(n).toLocaleString(I18N[lang].locale);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const refreshIcons = () => { try { window.lucide && window.lucide.createIcons(); } catch(e){} };
 
+function sanitizePriceInput(v){ return String(v).replace(/[^0-9\s.,kкmмKКMМ₽]/g, ''); }
 function parsePrice(raw){
   if (raw == null) return NaN;
   let s = String(raw).trim().toLowerCase().replace(/\s+/g, '').replace(/(₽|руб\.?|р\.?|\$)/g, '').replace(',', '.');
@@ -689,7 +1225,13 @@ function parsePrice(raw){
   const n = parseFloat(s);
   return (isNaN(n) || n < 0) ? NaN : n * mult;
 }
-function save(){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ state, budget, discount })); } catch(e){} }
+function getSuggestions(id, price){
+  const ranges = SUGGESTIONS[id];
+  if (!ranges) return [];
+  for (const r of ranges) if (price <= r.max) return r.items;
+  return ranges[ranges.length - 1].items;
+}
+function save(){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ state, budget, discount, activeBuild })); } catch(e){} }
 function load(){
   try {
     const p = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
@@ -698,9 +1240,12 @@ function load(){
       state[d.id].price = typeof s.price === 'number' ? s.price : null;
       state[d.id].qty = Math.min(99, Math.max(1, parseInt(s.qty) || 1));
       state[d.id].enabled = s.enabled !== false;
+      state[d.id].img = s.img || null;
+      state[d.id].name = s.name || null;
     });
     if (typeof p.budget === 'number') budget = p.budget;
     if (typeof p.discount === 'number') discount = p.discount;
+    if (p.activeBuild) activeBuild = p.activeBuild;
   } catch(e){}
 }
 function loadHistory(){ try { const r = localStorage.getItem(HISTORY_KEY); if (r) history = JSON.parse(r); } catch(e){} if (!Array.isArray(history)) history = []; }
@@ -720,6 +1265,8 @@ function applyStaticTranslations(){
   document.documentElement.lang = I18N[lang].htmlLang;
   document.title = I18N[lang].title;
   brandBadge.textContent = t('brandBadge');
+  buildsTitle.textContent = t('builds.title');
+  buildsSub.textContent = t('builds.sub');
   lblBudgetText.textContent = t('ui.budgetLabel');
   budgetInput.placeholder = t('ui.budgetPlaceholder');
   lblDiscountText.textContent = t('ui.discount');
@@ -742,44 +1289,93 @@ function applyStaticTranslations(){
   refreshIcons();
 }
 
-/* ═══════════ PRESETS ═══════════ */
-function renderPresets(){
-  presets.innerHTML = Object.entries(PRESETS).map(([k,p]) => {
-    const m = I18N[lang].presets[k];
-    return `<button class="preset${activePreset === k ? ' active' : ''}" data-preset="${k}">
-      <span class="preset-icon"><i data-lucide="${p.icon}"></i></span>
-      <span class="preset-text"><span class="preset-name">${m.name}</span><span class="preset-sub">${m.sub}</span></span>
-    </button>`;
+/* ═══════════ BUILDS ═══════════ */
+function renderBuilds(){
+  buildsGrid.innerHTML = BUILDS.map(b => {
+    const name = lang === 'ru' ? b.name : b.nameEn;
+    const desc = lang === 'ru' ? b.desc : b.descEn;
+    const tag = lang === 'ru' ? b.tag : b.tagEn;
+    const partsLabels = I18N[lang].builds.parts;
+    const partsHtml = Object.keys(b.parts).map(k =>
+      `<div class="build-part">
+        <span class="build-part-key"><i data-lucide="${iconForPart(k)}"></i>${esc(partsLabels[k] || k)}</span>
+        <span class="build-part-val">${esc(b.parts[k])}</span>
+      </div>`
+    ).join('');
+    return `<div class="build-card${activeBuild === b.key ? ' popular' : ''}" data-build="${b.key}">
+      <div class="build-img">
+        <span class="build-badge ${b.tagClass}">${esc(tag)}</span>
+        <img src="${esc(b.img)}" alt="${esc(name)}" loading="lazy" onerror="this.style.display='none'">
+        <div class="build-title-overlay">
+          <div class="build-title">${esc(name)}</div>
+          <div class="build-price">${fmt(b.total)} ₽</div>
+        </div>
+      </div>
+      <div class="build-body">
+        <div class="build-desc">${esc(desc)}</div>
+        <div class="build-parts">${partsHtml}</div>
+        <div class="build-total"><span>${esc(I18N[lang].builds.total)}</span><strong>${fmt(b.total)} ₽</strong></div>
+        <button class="build-apply" data-build="${b.key}">
+          <i data-lucide="wand-2"></i>
+          <span>${esc(I18N[lang].builds.apply)}</span>
+        </button>
+      </div>
+    </div>`;
   }).join('');
-  presets.querySelectorAll('.preset').forEach(b => b.addEventListener('click', () => { playSound('click'); applyPreset(b.dataset.preset); }));
+
+  buildsGrid.querySelectorAll('.build-apply').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      applyBuild(btn.dataset.build);
+    });
+  });
+  buildsGrid.querySelectorAll('.build-card').forEach(card => {
+    card.addEventListener('click', e => {
+      if (e.target.closest('.build-apply')) return;
+      applyBuild(card.dataset.build);
+    });
+  });
   refreshIcons();
 }
-function applyPreset(key){
-  const p = PRESETS[key]; if (!p) return;
+
+function iconForPart(k){
+  return {cpu:'cpu',gpu:'monitor',ram:'memory-stick',ssd:'hard-drive',mb:'circuit-board',psu:'plug-zap',case:'box',cooler:'fan'}[k] || 'package';
+}
+
+function applyBuild(key){
+  const b = BUILDS.find(x => x.key === key);
+  if (!b) return;
+
   DEVICES.forEach(d => {
-    if (p.prices[d.id] != null) {
-      state[d.id].price = p.prices[d.id];
+    if (b.devices[d.id]) {
+      const dev = b.devices[d.id];
+      state[d.id].price = dev.price;
       state[d.id].qty = 1;
       state[d.id].enabled = true;
+      state[d.id].img = dev.img || null;
+      state[d.id].name = dev.name || null;
     }
   });
-  activePreset = key;
-  renderPresets();
+
+  activeBuild = key;
+  renderBuilds();
   refreshAllInputs();
   syncEnabledClasses();
   updateCount();
   updateAll();
   save();
-  toast(t('toasts.presetApplied')(I18N[lang].presets[key].name), 'success');
+
   playSound('success');
+  fireConfetti();
+  const name = lang === 'ru' ? b.name : b.nameEn;
+  toast(t('toasts.buildApplied')(name), 'success');
 }
 
-/* ══════════ DEVICES ═══════════ */
+/* ═══════════ DEVICES ═══════════ */
 const deviceRefs = {};
 function renderDevices(){
   const frag = document.createDocumentFragment();
   devices.innerHTML = '';
-  deviceRefs.length = 0;
 
   DEVICES.forEach(d => {
     const label = t('devices.' + d.id);
@@ -787,21 +1383,25 @@ function renderDevices(){
     row.className = 'device' + (state[d.id].enabled ? '' : ' disabled');
     row.dataset.id = d.id;
     row.innerHTML = `
-      <label class="dev-check" title="${esc(t('ui.selectAll'))}">
-        <input type="checkbox" ${state[d.id].enabled ? 'checked' : ''}>
-        <span class="dev-check-box"></span>
-      </label>
-      <div class="dev-icon"><i data-lucide="${d.icon}"></i></div>
-      <div class="dev-info"><div class="dev-name">${label}</div><div class="dev-hint" data-hint></div></div>
-      <div class="qty-box">
-        <button class="qty-btn" data-qty="-1" tabindex="-1">−</button>
-        <input type="number" class="qty-input" min="1" max="99" value="${state[d.id].qty}">
-        <button class="qty-btn" data-qty="1" tabindex="-1">+</button>
+      <div class="device-main">
+        <label class="dev-check">
+          <input type="checkbox" ${state[d.id].enabled ? 'checked' : ''}>
+          <span class="dev-check-box"></span>
+        </label>
+        <div class="dev-icon"><i data-lucide="${d.icon}"></i></div>
+        <div class="dev-info"><div class="dev-name">${label}</div><div class="dev-hint" data-hint></div></div>
+        <div class="qty-box">
+          <button class="qty-btn" data-qty="-1" tabindex="-1">−</button>
+          <input type="number" class="qty-input" min="1" max="99" value="${state[d.id].qty}">
+          <button class="qty-btn" data-qty="1" tabindex="-1">+</button>
+        </div>
+        <div class="price-wrap">
+          <input type="text" class="price-input" placeholder="0" inputmode="decimal" autocomplete="off">
+          <span class="currency">₽</span>
+          <button class="suggest-badge" title="${esc(t('ui.suggestTooltip'))}"><i data-lucide="lightbulb"></i></button>
+        </div>
       </div>
-      <div class="price-wrap">
-        <input type="text" class="price-input" placeholder="0" inputmode="decimal" autocomplete="off">
-        <span class="currency">₽</span>
-      </div>`;
+      <div class="suggest-panel"><div class="suggest-inner"></div></div>`;
     frag.appendChild(row);
 
     const ref = {
@@ -809,19 +1409,49 @@ function renderDevices(){
       check: row.querySelector('.dev-check input'),
       price: row.querySelector('.price-input'),
       qty: row.querySelector('.qty-input'),
-      hint: row.querySelector('.dev-hint')
+      hint: row.querySelector('.dev-hint'),
+      badge: row.querySelector('.suggest-badge'),
+      panelInner: row.querySelector('.suggest-inner')
     };
     deviceRefs[d.id] = ref;
 
-    if (typeof state[d.id].price === 'number') ref.price.value = fmt(state[d.id].price);
+    if (typeof state[d.id].price === 'number') {
+      ref.price.value = fmt(state[d.id].price);
+      row.classList.add('has-price');
+    }
     ref.hint.textContent = t('hints.range')(fmt(d.min), fmt(d.max));
 
-    ref.price.addEventListener('input', () => onPriceInput(d.id));
+    ref.price.addEventListener('beforeinput', e => {
+      if (e.data && !/^[0-9\s.,kкmмKКMМ₽]*$/.test(e.data)) e.preventDefault();
+    });
+    ref.price.addEventListener('input', e => {
+      const raw = e.target.value;
+      const clean = sanitizePriceInput(raw);
+      if (clean !== raw) {
+        const pos = e.target.selectionStart - (raw.length - clean.length);
+        e.target.value = clean;
+        try { e.target.setSelectionRange(Math.max(0, pos), Math.max(0, pos)); } catch(_){}
+      }
+      onPriceInput(d.id);
+    });
+    ref.price.addEventListener('paste', e => {
+      const pasted = (e.clipboardData || window.clipboardData).getData('text');
+      const clean = sanitizePriceInput(pasted);
+      if (clean !== pasted) {
+        e.preventDefault();
+        const start = ref.price.selectionStart;
+        const before = ref.price.value.slice(0, start);
+        const after = ref.price.value.slice(ref.price.selectionEnd);
+        ref.price.value = before + clean + after;
+        ref.price.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    });
     ref.price.addEventListener('blur', () => onPriceBlur(d.id));
     ref.price.addEventListener('keydown', e => onKeyNav(e, ref.price));
     ref.qty.addEventListener('input', () => onQtyInput(d.id));
     ref.qty.addEventListener('blur', () => { ref.qty.value = state[d.id].qty; });
     ref.check.addEventListener('change', () => toggleDevice(d.id));
+    ref.badge.addEventListener('click', e => { e.stopPropagation(); toggleSuggest(d.id); });
 
     row.querySelectorAll('.qty-btn').forEach(b => b.addEventListener('click', () => {
       playSound('click');
@@ -837,11 +1467,85 @@ function renderDevices(){
   updateCount();
 }
 
+function toggleSuggest(id){
+  const r = deviceRefs[id];
+  if (!r || state[id].price == null) return;
+  const wasOpen = r.row.classList.contains('suggest-open');
+  document.querySelectorAll('.device.suggest-open').forEach(el => el.classList.remove('suggest-open'));
+  if (!wasOpen) {
+    renderSuggestPanel(id);
+    r.row.classList.add('suggest-open');
+    playSound('click');
+  }
+}
+function closeAllSuggest(){ document.querySelectorAll('.device.suggest-open').forEach(el => el.classList.remove('suggest-open')); }
+
+function renderSuggestPanel(id){
+  const r = deviceRefs[id];
+  const price = state[id].price;
+  if (!r || !price) return;
+  const items = getSuggestions(id, price);
+  const currentName = state[id].name;
+
+  r.panelInner.innerHTML =
+    `<div class="suggest-title"><i data-lucide="lightbulb"></i> ${t('ui.suggestTitle')(fmt(price))}</div>
+     <div class="suggest-hint"><i data-lucide="mouse-pointer-click"></i> ${esc(t('pickHint'))}</div>
+     <div class="suggest-list">${items.map((s, i) => {
+       const [name, itemPrice, tag, img] = s;
+       const isCurrent = currentName === name;
+       return `<div class="suggest-item${isCurrent ? ' is-current' : ''}" data-price="${itemPrice}" data-name="${esc(name)}" data-img="${esc(img)}" style="animation-delay:${i*60}ms">
+         <div class="sug-info">
+           <div class="sug-name">${esc(name)}</div>
+           ${tag ? `<div class="sug-tag">${esc(tag)}</div>` : ''}
+         </div>
+         <div class="sug-price">
+           ${fmt(itemPrice)} ₽
+           <i data-lucide="${isCurrent ? 'check' : 'corner-down-left'}"></i>
+         </div>
+       </div>`;
+     }).join('')}</div>`;
+  refreshIcons();
+
+  r.panelInner.querySelectorAll('.suggest-item').forEach(el => {
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      applySuggestion(id, parseInt(el.dataset.price), el.dataset.name, el.dataset.img);
+    });
+  });
+}
+
+function applySuggestion(id, itemPrice, itemName, itemImg){
+  const r = deviceRefs[id];
+  if (!r) return;
+
+  state[id].price = itemPrice;
+  state[id].enabled = true;
+  state[id].img = itemImg;
+  state[id].name = itemName;
+  if (!r.check.checked) r.check.checked = true;
+  r.row.classList.remove('disabled');
+
+  r.price.value = fmt(itemPrice);
+  r.row.classList.add('has-price');
+  r.row.classList.remove('error');
+  validateRow(id);
+  updateAll();
+  save();
+  activeBuild = null;
+  renderBuilds();
+
+  playSound('success');
+  toast(t('toasts.suggestionPicked')(itemName, fmt(itemPrice)), 'success');
+
+  setTimeout(() => { r.row.classList.remove('suggest-open'); }, 260);
+}
+
 function toggleDevice(id){
   const enabled = deviceRefs[id].check.checked;
   state[id].enabled = enabled;
   const row = deviceRefs[id].row;
   row.classList.toggle('disabled', !enabled);
+  if (!enabled) row.classList.remove('suggest-open');
   playSound('click');
   validateRow(id);
   updateCount();
@@ -855,6 +1559,8 @@ function refreshAllInputs(){
     r.price.value = state[d.id].price != null ? fmt(state[d.id].price) : '';
     r.qty.value = state[d.id].qty;
     r.check.checked = state[d.id].enabled;
+    r.row.classList.toggle('has-price', state[d.id].price != null);
+    if (r.row.classList.contains('suggest-open')) renderSuggestPanel(d.id);
     validateRow(d.id);
   });
 }
@@ -863,6 +1569,7 @@ function syncEnabledClasses(){
     const r = deviceRefs[d.id]; if (!r) return;
     r.row.classList.toggle('disabled', !state[d.id].enabled);
     r.check.checked = state[d.id].enabled;
+    if (!state[d.id].enabled) r.row.classList.remove('suggest-open');
   });
 }
 
@@ -871,12 +1578,18 @@ function onPriceInput(id){
   const r = deviceRefs[id];
   const parsed = parsePrice(r.price.value);
   state[id].price = (isNaN(parsed) || parsed <= 0) ? null : parsed;
+  if (state[id].price == null) { state[id].img = null; state[id].name = null; }
   r.row.classList.remove('error');
-  validateRow(id); updateAll(); save(); autoDetectPreset();
+  r.row.classList.toggle('has-price', state[id].price != null);
+  if (state[id].price == null) r.row.classList.remove('suggest-open');
+  validateRow(id); updateAll(); save();
 }
 function onPriceBlur(id){
   const r = deviceRefs[id], p = state[id].price;
-  if (typeof p === 'number' && p > 0) r.price.value = fmt(p);
+  if (typeof p === 'number' && p > 0) {
+    r.price.value = fmt(p);
+    if (r.row.classList.contains('suggest-open')) renderSuggestPanel(id);
+  }
   else if (!r.price.value.trim()) r.price.value = '';
 }
 function onQtyInput(id){
@@ -901,7 +1614,7 @@ function onKeyNav(e, el){
   }
 }
 
-/* ═══════════ VALIDATION ══════════ */
+/* ═══════════ VALIDATION ═══════════ */
 function validateRow(id){
   const d = DEVICES.find(x => x.id === id);
   const r = deviceRefs[id]; if (!r || !d) return;
@@ -909,10 +1622,7 @@ function validateRow(id){
   r.row.classList.remove('error', 'filled');
   r.hint.classList.remove('error', 'active');
 
-  if (!state[id].enabled) {
-    r.hint.textContent = t('hints.off');
-    return;
-  }
+  if (!state[id].enabled) { r.hint.textContent = t('hints.off'); return; }
   if (p == null) { r.hint.textContent = t('hints.range')(fmt(d.min), fmt(d.max)); return; }
   r.row.classList.add('filled');
 
@@ -925,7 +1635,7 @@ function validateRow(id){
   }
 }
 
-/* ══════════ COMPUTE ═══════════ */
+/* ═══════════ COMPUTE ═══════════ */
 function compute(){
   let subtotal = 0, hasError = false, hasValue = false;
   const items = [];
@@ -936,7 +1646,13 @@ function compute(){
     if (s.price < d.min || s.price > d.max) { hasError = true; continue; }
     const qty = s.qty || 1, sub = s.price * qty;
     subtotal += sub; hasValue = true;
-    items.push({ id:d.id, icon:d.icon, label:t('devices.' + d.id), price:s.price, qty, subtotal:sub });
+    items.push({
+      id:d.id, icon:d.icon,
+      label:t('devices.' + d.id),
+      price:s.price, qty, subtotal:sub,
+      img:s.img || PLACEHOLDER_IMGS[d.id] || null,
+      name:s.name || null
+    });
   }
   items.sort((a,b) => b.subtotal - a.subtotal);
   const discountAmount = subtotal * (discount / 100);
@@ -977,24 +1693,7 @@ function updateAll(){
   btnCalc.disabled = hasError || !hasValue;
 }
 
-function autoDetectPreset(){
-  const { items } = compute();
-  if (items.length < 3) { if (activePreset !== null) { activePreset = null; renderPresets(); } return; }
-  let best = null, bestDiff = Infinity;
-  for (const [key, p] of Object.entries(PRESETS)) {
-    let diff = 0, cnt = 0;
-    for (const d of DEVICES) {
-      if (p.prices[d.id] != null && state[d.id].enabled && state[d.id].price != null) {
-        diff += Math.abs(state[d.id].price - p.prices[d.id]) / p.prices[d.id]; cnt++;
-      }
-    }
-    if (cnt >= 3) { const avg = diff / cnt; if (avg < bestDiff) { bestDiff = avg; best = key; } }
-  }
-  if (bestDiff > .05) best = null;
-  if (activePreset !== best) { activePreset = best; renderPresets(); }
-}
-
-/* ═══════════ CALCULATE & SEQUENTIAL CHART ═══════════ */
+/* ═══════════ CALCULATE ═══════════ */
 function triggerCalculate(){
   const { hasError, hasValue, items, total, subtotal, discountAmount } = compute();
   if (hasError) {
@@ -1004,9 +1703,10 @@ function triggerCalculate(){
     toast(t('toasts.checkFields'), 'error'); playSound('error'); return;
   }
   if (!hasValue) return;
+  closeAllSuggest();
 
   buildBreakdown(items, subtotal);
-  buildChart(items, subtotal); // <-- Исправленная функция ниже
+  buildChart(items, subtotal);
   modal.classList.remove('active');
   void modal.offsetWidth;
   modal.classList.add('active');
@@ -1016,56 +1716,30 @@ function triggerCalculate(){
   else modalNote.textContent = `${items.length} ${I18N[lang].plural(items.length)}`;
 
   animateValue(modalTotal, 0, total, 1000);
-  
-  // Запускаем конфетти и звук после небольшой паузы, когда диаграмма начнет рисоваться
-  setTimeout(() => { 
-    fireConfetti(); 
-    playSound('success'); 
-    startTabAnimation(fmt(total)); // <-- Новая фишка с вкладкой
-  }, 300);
-  
+  setTimeout(() => { fireConfetti(); playSound('success'); }, 300);
   addHistory({ items, total });
 }
 
-// ✅ ИСПРАВЛЕННАЯ ФУНКЦИЯ ПОСЛЕДОВАТЕЛЬНОЙ ОТРИСОВКИ
 function buildChart(items, subtotal){
   const svg = document.querySelector('.chart-svg');
   svg.innerHTML = '';
-  const r = 15.9155;
-  const circumference = 2 * Math.PI * r;
-  
-  // Общее время анимации ~1.4с, делим поровну между сегментами
-  const durationPerSegment = 1400 / Math.max(items.length, 1); 
-  
-  let cumulativePercent = 0;
-
+  const r = 15.9155, c = 2 * Math.PI * r;
+  const count = items.length;
+  const segDur = Math.max(180, Math.min(500, 1400 / Math.max(1, count)));
+  let cum = 0;
   items.forEach((it, i) => {
-    const percent = it.subtotal / subtotal;
-    const dashArray = `${percent * circumference} ${circumference}`;
-    const dashOffset = -cumulativePercent * circumference;
-    
+    const p = it.subtotal / subtotal;
     const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    circle.setAttribute('cx', 18);
-    circle.setAttribute('cy', 18);
-    circle.setAttribute('r', r);
+    circle.setAttribute('cx', 18); circle.setAttribute('cy', 18); circle.setAttribute('r', r);
     circle.setAttribute('class', 'chart-segment');
     circle.setAttribute('stroke', COLORS[i % COLORS.length]);
-    
-    // Изначально сегмент скрыт (dasharray: 0 100)
-    circle.setAttribute('stroke-dasharray', `0 ${circumference}`);
-    circle.setAttribute('stroke-dashoffset', dashOffset);
-    
+    circle.setAttribute('stroke-dasharray', `${p * c} ${c}`);
+    circle.setAttribute('stroke-dashoffset', -cum * c);
+    circle.style.animationDuration = segDur + 'ms';
+    circle.style.animationDelay = (i * segDur) + 'ms';
     svg.appendChild(circle);
-    
-    // Запускаем анимацию последовательно
-    setTimeout(() => {
-      circle.style.transitionDuration = `${durationPerSegment}ms`;
-      circle.setAttribute('stroke-dasharray', dashArray);
-    }, i * durationPerSegment);
-
-    cumulativePercent += percent;
+    cum += p;
   });
-  
   chartCenter.innerHTML = `${items.length}<br>${t('ui.chartPositions')}`;
 }
 
@@ -1073,13 +1747,21 @@ function buildBreakdown(items, subtotal){
   if (!items.length) { breakdown.innerHTML = ''; return; }
   breakdown.innerHTML = items.map((it, i) => {
     const pct = (it.subtotal / subtotal) * 100;
-    return `<div class="bd-row" style="animation-delay:${i * 70}ms">
-      <div class="bd-icon"><i data-lucide="${it.icon}"></i></div>
-      <div class="bd-main">
-        <div class="bd-name">${esc(it.label)}${it.qty > 1 ? ` · ${it.qty} ${lang==='ru'?'шт':'pcs'}` : ''}</div>
-        <div class="bd-bar"><div class="bd-bar-fill" style="--pct:${pct}%;animation-delay:${i*70+180}ms"></div></div>
+    const rowDelay = i * 90;
+    const barDelay = i * 90 + 220;
+    const valDelay = i * 90 + 340;
+    const thumbDelay = i * 90 + 100;
+    const imgSrc = it.img || '';
+    const altText = it.name || it.label;
+    return `<div class="bd-row" style="animation-delay:${rowDelay}ms">
+      <div class="bd-thumb" style="animation-delay:${thumbDelay}ms">
+        ${imgSrc ? `<img src="${esc(imgSrc)}" alt="${esc(altText)}" loading="lazy" onerror="this.parentNode.innerHTML='<i data-lucide=\\'${it.icon}\\'></i>'; if(window.lucide)window.lucide.createIcons();">` : `<i data-lucide="${it.icon}"></i>`}
       </div>
-      <div class="bd-val">${fmt(it.subtotal)} ₽</div>
+      <div class="bd-main">
+        <div class="bd-name">${esc(it.name || it.label)}${it.qty > 1 ? ` · ${it.qty} ${lang==='ru'?'шт':'pcs'}` : ''}</div>
+        <div class="bd-bar"><div class="bd-bar-fill" style="--pct:${pct}%;animation-delay:${barDelay}ms"></div></div>
+      </div>
+      <div class="bd-val" style="animation-delay:${valDelay}ms">${fmt(it.subtotal)} ₽</div>
     </div>`;
   }).join('');
   refreshIcons();
@@ -1099,34 +1781,11 @@ function animateValue(obj, start, end, dur){
   requestAnimationFrame(step);
 }
 
-/* ═══════════ TAB ANIMATION (НОВАЯ ФИШКА) ═══════════ */
-let tabAnimInterval = null;
-function startTabAnimation(amountStr) {
-  if (tabAnimInterval) clearInterval(tabAnimInterval);
-  const originalTitle = document.title;
-  const frames = ['💰', '✨', '🔥', '✅'];
-  let frameIndex = 0;
-  
-  tabAnimInterval = setInterval(() => {
-    document.title = `${frames[frameIndex]} Bilab: ${amountStr}`;
-    frameIndex = (frameIndex + 1) % frames.length;
-  }, 1500);
-
-  // Останавливаем анимацию, когда пользователь возвращается на вкладку
-  const stopHandler = () => {
-    document.title = originalTitle;
-    clearInterval(tabAnimInterval);
-    tabAnimInterval = null;
-    document.removeEventListener('visibilitychange', stopHandler);
-  };
-  document.addEventListener('visibilitychange', stopHandler);
-}
-
 /* ═══════════ HISTORY ═══════════ */
 function addHistory(e){
   history.unshift({
     ts: Date.now(), total: e.total, count: e.items.length,
-    items: e.items.map(i => ({ id:i.id, price:i.price, qty:i.qty })),
+    items: e.items.map(i => ({ id:i.id, price:i.price, qty:i.qty, img:i.img, name:i.name })),
     enabled: Object.fromEntries(DEVICES.map(d => [d.id, state[d.id].enabled]))
   });
   if (history.length > 8) history.length = 8;
@@ -1150,8 +1809,15 @@ function renderHistory(){
     DEVICES.forEach(d => {
       state[d.id].price = null; state[d.id].qty = 1;
       state[d.id].enabled = h.enabled ? h.enabled[d.id] !== false : true;
+      state[d.id].img = null; state[d.id].name = null;
     });
-    h.items.forEach(it => { if (state[it.id]) { state[it.id].price = it.price; state[it.id].qty = it.qty; } });
+    h.items.forEach(it => { if (state[it.id]) {
+      state[it.id].price = it.price;
+      state[it.id].qty = it.qty;
+      state[it.id].img = it.img || null;
+      state[it.id].name = it.name || null;
+    }});
+    activeBuild = null; renderBuilds();
     refreshAllInputs(); syncEnabledClasses(); updateCount(); updateAll(); save();
     toast(t('toasts.historyRestored'), 'success');
   }));
@@ -1168,7 +1834,7 @@ function shareLink(){
   const payload = { budget, discount, d: {} };
   DEVICES.forEach(d => {
     if (state[d.id].price != null || !state[d.id].enabled) {
-      payload.d[d.id] = { p: state[d.id].price, q: state[d.id].qty, e: state[d.id].enabled };
+      payload.d[d.id] = { p: state[d.id].price, q: state[d.id].qty, e: state[d.id].enabled, i: state[d.id].img, n: state[d.id].name };
     }
   });
   try {
@@ -1188,6 +1854,8 @@ function tryLoadFromURL(){
         state[d.id].price = p.d[d.id].p;
         state[d.id].qty = p.d[d.id].q || 1;
         state[d.id].enabled = p.d[d.id].e !== false;
+        state[d.id].img = p.d[d.id].i || null;
+        state[d.id].name = p.d[d.id].n || null;
       }
     });
     if (typeof p.budget === 'number') budget = p.budget;
@@ -1199,7 +1867,7 @@ function exportJSON(){
   const { items, total, subtotal, discountAmount } = compute();
   if (!items.length) { toast(t('toasts.nothingToExport'), 'error'); return; }
   const data = { generatedAt: new Date().toISOString(), lang, budget, discount, discountAmount, subtotal, total,
-    items: items.map(i => ({ id:i.id, label:i.label, price:i.price, qty:i.qty, subtotal:i.subtotal })),
+    items: items.map(i => ({ id:i.id, label:i.label, price:i.price, qty:i.qty, subtotal:i.subtotal, img:i.img, name:i.name })),
     enabled: Object.fromEntries(DEVICES.map(d => [d.id, state[d.id].enabled])) };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
@@ -1215,10 +1883,11 @@ function handleFile(e){
     try {
       const p = JSON.parse(ev.target.result);
       if (!p.items) throw 0;
-      DEVICES.forEach(d => { state[d.id].price = null; state[d.id].qty = 1; state[d.id].enabled = p.enabled ? p.enabled[d.id] !== false : true; });
-      p.items.forEach(it => { if (state[it.id]) { state[it.id].price = it.price; state[it.id].qty = it.qty || 1; } });
+      DEVICES.forEach(d => { state[d.id].price = null; state[d.id].qty = 1; state[d.id].enabled = p.enabled ? p.enabled[d.id] !== false : true; state[d.id].img = null; state[d.id].name = null; });
+      p.items.forEach(it => { if (state[it.id]) { state[it.id].price = it.price; state[it.id].qty = it.qty || 1; state[it.id].img = it.img || null; state[it.id].name = it.name || null; } });
       if (typeof p.budget === 'number') { budget = p.budget; budgetInput.value = budget ? fmt(budget) : ''; }
       if (typeof p.discount === 'number') { discount = p.discount; discountInput.value = discount; }
+      activeBuild = null; renderBuilds();
       refreshAllInputs(); syncEnabledClasses(); updateCount(); updateAll(); save();
       toast(t('toasts.imported'), 'success');
     } catch(err) { toast(t('toasts.importFail'), 'error'); }
@@ -1227,14 +1896,16 @@ function handleFile(e){
   e.target.value = '';
 }
 
-/* ══════════ RESET ═══════════ */
+/* ═══════════ RESET ═══════════ */
 function resetAll(){
   const { hasValue } = compute();
   if (hasValue && !confirm(t('confirm.reset'))) return;
-  DEVICES.forEach(d => { state[d.id] = { price:null, qty:1, enabled:true }; });
-  budget = 0; discount = 0; activePreset = null;
+  DEVICES.forEach(d => { state[d.id] = { price:null, qty:1, enabled:true, img:null, name:null }; });
+  budget = 0; discount = 0; activeBuild = null;
   budgetInput.value = ''; discountInput.value = '0';
-  refreshAllInputs(); syncEnabledClasses(); renderPresets(); updateCount(); updateAll(); save();
+  closeAllSuggest();
+  renderBuilds();
+  refreshAllInputs(); syncEnabledClasses(); updateCount(); updateAll(); save();
   toast(t('toasts.reset'), 'info');
 }
 
@@ -1258,7 +1929,7 @@ function setLang(nl){
   lang = nl;
   try { localStorage.setItem(LANG_KEY, nl); } catch(e){}
   applyStaticTranslations();
-  renderPresets();
+  renderBuilds();
   renderDevices();
   renderHistory();
   const m = modal;
@@ -1277,15 +1948,17 @@ function setLang(nl){
   updateCount(); updateAll(); refreshIcons();
 }
 
-/* ══════════ SHORTCUTS для частого доступа к DOM ═══════════ */
+/* ═══════════ DOM SHORTCUTS ═══════════ */
 const $ = id => document.getElementById(id);
-const brandBadge = $('brandBadge'), lblBudgetText = $('lblBudgetText'), budgetInput = $('budgetInput'),
+const brandBadge = $('brandBadge'),
+      buildsTitle = $('buildsTitle'), buildsSub = $('buildsSub'), buildsGrid = $('buildsGrid'),
+      lblBudgetText = $('lblBudgetText'), budgetInput = $('budgetInput'),
       lblDiscountText = $('lblDiscountText'), lblTotalText = $('lblTotalText'),
       totalValue = $('totalValue'), totalOriginal = $('totalOriginal'),
       progressFill = $('progressFill'), progressUsed = $('progressUsed'), progressPct = $('progressPct'),
       btnCalc = $('btnCalc'), btnCalcText = $('btnCalcText'), btnReset = $('btnReset'),
       miniShareText = $('miniShareText'), miniExportText = $('miniExportText'), miniImportText = $('miniImportText'),
-      presets = $('presets'), devices = $('devices'), deviceList = $('devices'),
+      devices = $('devices'),
       devicesCount = $('devicesCount'), btnSelectAll = $('btnSelectAll'), btnSelectNone = $('btnSelectNone'),
       historyList = $('historyList'), lblHistoryText = $('lblHistoryText'), lblHistoryClearText = $('lblHistoryClearText'),
       modal = $('modal'), modalTotal = $('modalTotal'), modalNote = $('modalNote'),
@@ -1304,7 +1977,7 @@ tryLoadFromURL();
 
 lang = detectLang();
 applyStaticTranslations();
-renderPresets();
+renderBuilds();
 renderDevices();
 renderHistory();
 
@@ -1324,6 +1997,7 @@ btnSelectAll.addEventListener('click', () => {
 });
 btnSelectNone.addEventListener('click', () => {
   playSound('click');
+  closeAllSuggest();
   DEVICES.forEach(d => state[d.id].enabled = false);
   syncEnabledClasses(); updateCount(); updateAll(); save();
   toast(t('toasts.allOff'), 'info');
@@ -1345,8 +2019,24 @@ fileInput.addEventListener('change', handleFile);
 $('historyClear').addEventListener('click', clearHistory);
 themeToggle.addEventListener('click', toggleTheme);
 
-budgetInput.addEventListener('input', e => { const v = parsePrice(e.target.value); budget = isNaN(v) ? 0 : v; updateAll(); save(); });
+budgetInput.addEventListener('beforeinput', e => {
+  if (e.data && !/^[0-9\s.,kкmмKКMМ₽]*$/.test(e.data)) e.preventDefault();
+});
+budgetInput.addEventListener('input', e => {
+  const raw = e.target.value;
+  const clean = sanitizePriceInput(raw);
+  if (clean !== raw) {
+    const pos = e.target.selectionStart - (raw.length - clean.length);
+    e.target.value = clean;
+    try { e.target.setSelectionRange(Math.max(0, pos), Math.max(0, pos)); } catch(_){}
+  }
+  const v = parsePrice(e.target.value);
+  budget = isNaN(v) ? 0 : v;
+  updateAll();
+  save();
+});
 budgetInput.addEventListener('blur', () => { if (budget > 0) budgetInput.value = fmt(budget); });
+
 discountInput.addEventListener('input', e => { let v = parseInt(e.target.value) || 0; v = Math.max(0, Math.min(90, v)); discount = v; updateAll(); save(); });
 discountInput.addEventListener('blur', () => { discountInput.value = discount; });
 
@@ -1359,7 +2049,7 @@ $('modalCopy').addEventListener('click', async () => {
   const { items, total, subtotal, discountAmount } = compute(); if (!items.length) return;
   const R = I18N[lang].report;
   const lines = [R.header, ''];
-  items.forEach(i => lines.push(`${i.label}${i.qty > 1 ? ` ×${i.qty}` : ''} — ${fmt(i.subtotal)} ₽`));
+  items.forEach(i => lines.push(`${i.name || i.label}${i.qty > 1 ? ` ×${i.qty}` : ''} — ${fmt(i.subtotal)} ₽`));
   lines.push('');
   if (discount > 0) { lines.push(`${R.subtotal}: ${fmt(subtotal)} ₽`); lines.push(`${R.discount} ${discount}%: −${fmt(discountAmount)} ₽`); }
   lines.push(`${R.total}: ${fmt(total)} ₽`);
@@ -1368,9 +2058,13 @@ $('modalCopy').addEventListener('click', async () => {
   catch(e) { toast(t('toasts.copyFail'), 'error'); }
 });
 
+document.addEventListener('click', e => {
+  if (!e.target.closest('.suggest-badge') && !e.target.closest('.suggest-item')) closeAllSuggest();
+});
+
 document.addEventListener('keydown', e => {
   if (e.target && e.target.matches && e.target.matches('input, textarea')) return;
-  if (e.key === 'Escape') closeModal();
+  if (e.key === 'Escape') { closeModal(); closeAllSuggest(); }
   if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); triggerCalculate(); }
 });
 </script>
